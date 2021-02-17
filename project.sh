@@ -2,17 +2,26 @@
 
 export DOCKER_BUILDKIT=1
 
-cd $(dirname "$0")
+PROJECT_ROOT=$(cd $(dirname "$0") && pwd)
+cd $PROJECT_ROOT
+
+if [[ "$(docker images -q mcr.microsoft.com/dotnet/sdk:5.0 2> /dev/null)" == "" ]]; then
+  docker pull mcr.microsoft.com/dotnet/sdk:5.0
+fi
+
+if [[ "$(docker images -q mcr.microsoft.com/dotnet/sdk:5.0 2> /dev/null)" == "" ]]; then
+  docker pull mcr.microsoft.com/dotnet/aspnet:5.0
+fi
 
 case "$1" in
     build)
         #build the image (see Dockerfile)
         #target is run (we have 2 stages, run and build)
         #name the created image "aspnet-playground"
-        docker build --target run -t aspnet-playground .
+        docker build --target run -t aspnet-playground -f ./docker/aspnet-playground/Dockerfile .
         ;;
     rebuild)
-        docker build --target run -t aspnet-playground --no-cache .
+        docker build --target run -t aspnet-playground --no-cache -f ./docker/aspnet-playground/Dockerfile .
         ;;
     start)
         #run in background (-d)
@@ -25,14 +34,17 @@ case "$1" in
         docker stop aspnet-playground
         ;;
     shell)
-        docker-compose run dotnet_shell
+        if [[ "$(docker images -q aspnet-playground-dotnet-shell 2> /dev/null)" == "" ]]; then
+            docker build -t aspnet-playground-dotnet-shell -f ./docker/dotnet-shell/Dockerfile .
+        fi
+        docker-compose -f ./docker/docker-compose.yml run dotnet_shell
         ;;
     *)
         echo "usage: ./project.sh COMMAND"
         echo "    build      builds the project"
         echo "    rebuild    cleans and builds the project"
-        echo "    start      run the project"
-        echo "    stop       stop the project"
+        echo "    start      run the webserver"
+        echo "    stop       stop the webserver"
         echo "    shell      start a shell in docker that has dotnet installed"
         ;;
 esac

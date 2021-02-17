@@ -1,7 +1,7 @@
 version: '3'
 services: 
   dotnet_shell:
-    image: mcr.microsoft.com/dotnet/sdk:5.0
+    image: aspnet-playground-dotnet-shell
     volumes: 
       - './src:/src'
     working_dir: /src
