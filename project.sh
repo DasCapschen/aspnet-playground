@@ -24,11 +24,15 @@ case "$1" in
     stop)
         docker stop aspnet-playground
         ;;
+    shell)
+        docker-compose run dotnet_shell
+        ;;
     *)
         echo "usage: ./project.sh COMMAND"
         echo "    build      builds the project"
         echo "    rebuild    cleans and builds the project"
         echo "    start      run the project"
         echo "    stop       stop the project"
+        echo "    shell      start a shell in docker that has dotnet installed"
         ;;
 esac
