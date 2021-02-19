@@ -34,9 +34,7 @@ case "$1" in
         docker stop aspnet-playground
         ;;
     shell)
-        if [[ "$(docker images -q aspnet-playground-dotnet-shell 2> /dev/null)" == "" ]]; then
-            docker build -t aspnet-playground-dotnet-shell -f ./docker/dotnet-shell/Dockerfile .
-        fi
+        docker build -t aspnet-playground-dotnet-shell -f ./docker/dotnet-shell/Dockerfile .
         docker-compose -f ./docker/docker-compose.yml run dotnet_shell
         ;;
     *)
