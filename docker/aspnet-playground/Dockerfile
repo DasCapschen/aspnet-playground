@@ -19,4 +19,5 @@ RUN dotnet publish -o /build
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS run
 WORKDIR /build
 COPY --from=build /build .
+ENV ASPNETCORE_ENVIRONMENT=Development
 ENTRYPOINT ["dotnet", "src.dll"]
