@@ -34,7 +34,7 @@ case "$1" in
         docker stop aspnet-playground
         ;;
     shell)
-        docker build -t aspnet-playground-dotnet-shell -f ./docker/dotnet-shell/Dockerfile .
+        docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t aspnet-playground-dotnet-shell -f ./docker/dotnet-shell/Dockerfile .
         docker-compose -f ./docker/docker-compose.yml run --rm dotnet_shell
         ;;
     *)
