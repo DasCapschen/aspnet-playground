@@ -35,7 +35,7 @@ case "$1" in
         ;;
     shell)
         docker build -t aspnet-playground-dotnet-shell -f ./docker/dotnet-shell/Dockerfile .
-        docker-compose -f ./docker/docker-compose.yml run dotnet_shell
+        docker-compose -f ./docker/docker-compose.yml run --rm dotnet_shell
         ;;
     *)
         echo "usage: ./project.sh COMMAND"
