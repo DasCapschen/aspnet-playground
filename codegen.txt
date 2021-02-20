@@ -1,0 +1,3 @@
+dotnet aspnet-codegenerator -p ./src.csproj controller -name ActivityProtocolController -m src.Models.ActivityProtocol -dc src.Data.ApplicationDbContext -udl -outDir Controllers -namespace src.Controllers -sqlite
+dotnet ef migrations add activityprotocol
+dotnet ef database update
