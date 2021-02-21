@@ -20,9 +20,15 @@ namespace src.Controllers
         }
 
         // GET: ActivityProtocol
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string SearchQuery = "")
         {
-            return View(await _context.ActivityProtocols.ToListAsync());
+            //TODO: fuzzy search?
+            IQueryable<ActivityProtocol> data = _context.ActivityProtocols;
+            if(SearchQuery != "") {
+                data = data.Where(p => p.JournalEntry.Contains(SearchQuery) 
+                    || p.Entries.Any(e => e.Description.Contains(SearchQuery)));
+            }
+            return View(await data.ToListAsync());
         }
 
         // GET: ActivityProtocol/Details/5
