@@ -16,12 +16,13 @@ start() {
     #forward HOST port 8182 to CONTAINER port 80
     #run image called "aspnet-playground"
     #remove container when stopped (--rm)
-    docker run --name aspnet-playground --rm -p 8182:80 -d aspnet-playground
-        
+    #docker run --name aspnet-playground --rm -p 8182:80 -d aspnet-playground
+    docker-compose -f ./docker/docker-compose.yml up -d web db
 }
 
 stop() {
-    docker stop aspnet-playground
+    #docker stop aspnet-playground
+    docker-compose -f ./docker/docker-compose.yml down
 }
 
 shell() {
@@ -34,12 +35,19 @@ export DOCKER_BUILDKIT=1
 PROJECT_ROOT=$(cd $(dirname "$0") && pwd)
 cd $PROJECT_ROOT
 
+# letting docker-compose or similar pull the images results in a "connection refused"
+# for some reason, so we have to explicitly pull the images before!
+
 if [[ "$(docker images -q mcr.microsoft.com/dotnet/sdk:5.0 2> /dev/null)" == "" ]]; then
   docker pull mcr.microsoft.com/dotnet/sdk:5.0
 fi
 
 if [[ "$(docker images -q mcr.microsoft.com/dotnet/sdk:5.0 2> /dev/null)" == "" ]]; then
   docker pull mcr.microsoft.com/dotnet/aspnet:5.0
+fi
+
+if [[ "$(docker images -q postgres:13.2-alpine 2> /dev/null)" == "" ]]; then
+  docker pull postgres:13.2-alpine
 fi
 
 case "$1" in

@@ -1,5 +1,23 @@
 version: '3'
-services: 
+services:
+  web:
+    image: aspnet-playground
+    ports: 
+      - "8182:80"
+
+  db:
+    image: postgres:13.2-alpine
+    volumes:
+      - '../db:/var/lib/postgresql/data'
+    # Note:
+    # in production env, it would probably be better to use
+    # POSTGRES_PASSWORD_FILE=/path/to/a/file/in/container
+    # having copied that file into the docker image at some point
+    environment:
+      - POSTGRES_PASSWORD=container
+      - POSTGRES_USER=docker
+      - POSTGRES_DB=playground
+    
   dotnet_shell:
     image: aspnet-playground-dotnet-shell
     volumes: 
