@@ -1,13 +1,19 @@
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
+<!-- Why do we need UserManager? we never use it, do we? -->
 @inject UserManager<IdentityUser> UserManager
 
 <ul class="navbar-nav">
+<!-- Where does the variable "User" come from? -->
 @if (SignInManager.IsSignedIn(User))
 {
+    // what exactly is an asp-net area?
+    // again, where does the User variable come from?
     <li class="nav-item">
         <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity.Name!</a>
     </li>
+    // how does this URL Action work?
+    // execute Index() from controller Home, using a new empty area?
     <li class="nav-item">
         <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
             <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
