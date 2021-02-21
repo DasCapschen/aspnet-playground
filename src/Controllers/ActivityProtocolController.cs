@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using src.Models;
 
 namespace src.Controllers
 {
+    [Authorize]
     public class ActivityProtocolController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -99,20 +101,18 @@ namespace src.Controllers
                 return NotFound();
             }
 
-            //I hope this works as intended.
-            //website does not allow edit if time > protocoltime + 24h, 
-            //but if we still somehow receive a POST to edit, forbid it!
-            var _oldProtocol = _context.ActivityProtocols.Find(id);
-            if(DateTimeOffset.UtcNow > _oldProtocol.Date.AddHours(24)) 
-            {
-                return Forbid();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(activityProtocol);
+                    var change = _context.Update(activityProtocol);
+                    //FIXME: this does not work!!
+                    if(DateTimeOffset.UtcNow > ((DateTimeOffset)change.OriginalValues["Date"]).AddHours(24))
+                    {
+                        //is forbid right here, or should we rather just undo changes?
+                        return Forbid();
+                    }
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)

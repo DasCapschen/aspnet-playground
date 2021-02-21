@@ -1,63 +1,47 @@
 @model IEnumerable<src.Models.ActivityProtocol>
 
-<!--  --> 
-@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
-
 @{
     ViewData["Title"] = "Index";
 }
 
-<!-- copying from _LoginPartial.cshtml here, where does user come from? -->
-@if (SignInManager.IsSignedIn(User))
-{
-    <h1>Index</h1>
-    <p>
-        Welcome back, @User.Identity.Name!<br/>
-        Why don't you <a asp-action="Create">add a new entry</a>?
-    </p>
-    <div class="single-line-form">
-        <form asp-action="Index" method="get">
-            <input name="SearchQuery" class="form-control"/>
-            <input type="submit" value="Search" class="btn btn-primary"/>
-        </form>
-    </div>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Date)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.JournalEntry)
-                </th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach (var item in Model) {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Date)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.JournalEntry)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
-}
-else
-{
-    <h1>Login Required</h1>
-    <p>
-        Please <a asp-area="Identity" asp-page="/Account/Login">log in</a> to see and edit your activity protocol.
-    </p>
-}
+<h1>Index</h1>
+<p>
+    Welcome back, @User.Identity.Name!<br/>
+    Why don't you <a asp-action="Create">add a new entry</a>?
+</p>
+<div class="single-line-form">
+    <form asp-action="Index" method="get">
+        <input name="SearchQuery" class="form-control"/>
+        <input type="submit" value="Search" class="btn btn-primary"/>
+    </form>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Date)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.JournalEntry)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Date)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.JournalEntry)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
