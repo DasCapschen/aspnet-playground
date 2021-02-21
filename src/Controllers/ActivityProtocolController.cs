@@ -93,6 +93,15 @@ namespace src.Controllers
                 return NotFound();
             }
 
+            //I hope this works as intended.
+            //website does not allow edit if time > protocoltime + 24h, 
+            //but if we still somehow receive a POST to edit, forbid it!
+            var _oldProtocol = _context.ActivityProtocols.Find(id);
+            if(DateTimeOffset.UtcNow > _oldProtocol.Date.AddHours(24)) 
+            {
+                return Forbid();
+            }
+
             if (ModelState.IsValid)
             {
                 try
