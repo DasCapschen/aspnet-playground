@@ -30,13 +30,14 @@ shell() {
     docker-compose -f ./docker/docker-compose.yml run --rm dotnet_shell
 }
 
+export COMPOSE_DOCKER_CLI_BUILD=1
 export DOCKER_BUILDKIT=1
 
 PROJECT_ROOT=$(cd $(dirname "$0") && pwd)
 cd $PROJECT_ROOT
 
 # letting docker-compose or similar pull the images results in a "connection refused"
-# for some reason, so we have to explicitly pull the images before!
+# for some reason, so we have to explicitly pull the images before
 
 if [[ "$(docker images -q mcr.microsoft.com/dotnet/sdk:5.0 2> /dev/null)" == "" ]]; then
   docker pull mcr.microsoft.com/dotnet/sdk:5.0

@@ -1,0 +1,15 @@
+#ignore folders
+db/
+.vscode/
+.git/
+src/bin/
+src/obj/
+docker/
+
+#ignore files
+.gitignore
+.directory
+workspace.code-workspace
+LICENSE
+README.md
+project.sh

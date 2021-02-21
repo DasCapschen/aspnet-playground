@@ -8,7 +8,7 @@ services:
   db:
     image: postgres:13.2-alpine
     volumes:
-      - '../db:/var/lib/postgresql/data'
+      - 'aspnet_playground_db_volume:/var/lib/postgresql/data'
     # Note:
     # in production env, it would probably be better to use
     # POSTGRES_PASSWORD_FILE=/path/to/a/file/in/container
@@ -24,3 +24,6 @@ services:
       - '../src:/src'
     working_dir: /src
     command: bash
+
+volumes:
+  aspnet_playground_db_volume:
