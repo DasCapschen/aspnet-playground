@@ -13,10 +13,10 @@ rebuild() {
 
 start() {
     #run in background (-d)
-    #forward HOST port 8080 to CONTAINER port 80
+    #forward HOST port 8182 to CONTAINER port 80
     #run image called "aspnet-playground"
     #remove container when stopped (--rm)
-    docker run --name aspnet-playground --rm -p 8080:80 -d aspnet-playground
+    docker run --name aspnet-playground --rm -p 8182:80 -d aspnet-playground
         
 }
 
