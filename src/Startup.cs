@@ -12,6 +12,8 @@ using src.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using src.Policies;
+using Microsoft.AspNetCore.Authorization;
 
 namespace src
 {
@@ -37,6 +39,15 @@ namespace src
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddControllersWithViews();
+
+            // add our policy that requires documents to be no older than 24h for editing
+            services.AddAuthorization(options => {
+                options.AddPolicy("OneDayEditPolicy", policy => 
+                    policy.Requirements.Add(new OneDayEditRequirement()));
+            });
+
+            //add the handler for that policy
+            services.AddSingleton<IAuthorizationHandler, OneDayEditPolicyHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

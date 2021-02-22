@@ -4,44 +4,32 @@
     ViewData["Title"] = "Edit";
 }
 
-@if (System.DateTimeOffset.UtcNow > Model.Date.AddHours(24))
-{
-    <h1>Edit Disabled</h1>
-    <p>
-        Sorry, you can only edit protocols for 24 hours after they have been created.<br/>
-        You shouldn't go back and change history.<br/>
-        <a asp-action="Index">Back to List</a>
-    </p>
-}
-else 
-{
-    <h1>Edit</h1>
+<h1>Edit</h1>
 
-    <h4>ActivityProtocol</h4>
-    <hr />
-    <div class="row">
-        <div class="col-md-4">
-            <form asp-action="Edit">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="Id" />
-                <div class="form-group">
-                    <label asp-for="Date" class="control-label"></label>
-                    <input asp-for="Date" class="form-control" />
-                    <span asp-validation-for="Date" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="JournalEntry" class="control-label"></label>
-                    <input asp-for="JournalEntry" class="form-control" />
-                    <span asp-validation-for="JournalEntry" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <input type="submit" value="Save" class="btn btn-primary" />
-                </div>
-            </form>
-        </div>
+<h4>ActivityProtocol</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="Date" class="control-label"></label>
+                <input asp-for="Date" class="form-control" />
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="JournalEntry" class="control-label"></label>
+                <input asp-for="JournalEntry" class="form-control" />
+                <span asp-validation-for="JournalEntry" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
     </div>
+</div>
 
-    <div>
-        <a asp-action="Index">Back to List</a>
-    </div>
-}
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

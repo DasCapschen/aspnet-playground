@@ -15,10 +15,12 @@ namespace src.Controllers
     public class ActivityProtocolController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private IAuthorizationService _authorizationService;
 
-        public ActivityProtocolController(ApplicationDbContext context)
+        public ActivityProtocolController(ApplicationDbContext context, IAuthorizationService authorizationService)
         {
             _context = context;
+            _authorizationService = authorizationService;
         }
 
         // GET: ActivityProtocol
@@ -91,6 +93,12 @@ namespace src.Controllers
             {
                 return NotFound();
             }
+
+            var auth = await _authorizationService.AuthorizeAsync(User, activityProtocol, "OneDayEditPolicy");
+            if(!auth.Succeeded) {
+                return View("EditForbidden");
+            }
+
             return View(activityProtocol);
         }
 
@@ -110,16 +118,16 @@ namespace src.Controllers
             {
                 try
                 {
-                    var change = _context.Update(activityProtocol);
-                    //change.property().OriginalValue is already the CHANGED one... what!?
-                    //var max_date = change.Property(p => p.Date).OriginalValue.AddHours(24);
-                    var max_date = change.GetDatabaseValues().GetValue<DateTimeOffset>("Date").AddHours(24);
-                    if(DateTimeOffset.UtcNow > max_date)
-                    {
-                        //is forbid right here, or should we rather just undo changes?
+                    //get old protocol values (warning: context starts change-tracking it!)
+                    ActivityProtocol oldProtocol = _context.ActivityProtocols.First(p => p.Id == id);
+                    var auth = await _authorizationService.AuthorizeAsync(User, oldProtocol, "OneDayEditPolicy");
+                    if(!auth.Succeeded) {
                         return Forbid();
                     }
+                    //detach old protocol so we can update new protocol below
+                    _context.Entry(oldProtocol).State = EntityState.Detached;
 
+                    var change = _context.Update(activityProtocol);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
