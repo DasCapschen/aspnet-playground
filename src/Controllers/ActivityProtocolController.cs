@@ -24,11 +24,16 @@ namespace src.Controllers
         // GET: ActivityProtocol
         public async Task<IActionResult> Index(string SearchQuery = "")
         {
-            //TODO: fuzzy search?
             IQueryable<ActivityProtocol> data = _context.ActivityProtocols;
-            if(SearchQuery != "") {
-                data = data.Where(p => p.JournalEntry.Contains(SearchQuery) 
-                    || p.Entries.Any(e => e.Description.Contains(SearchQuery)));
+            if(SearchQuery != "") 
+            {
+                //doing this up-front causes exception... "the query switched to client-evaluation"
+                //var tsQuery = EF.Functions.PlainToTsQuery(SearchQuery);
+                //FIXME: this is slow because we do not have an index!
+                data = from p in _context.ActivityProtocols
+                       where EF.Functions.ToTsVector(p.JournalEntry).Matches(EF.Functions.PlainToTsQuery(SearchQuery))
+                       || p.Entries.Any(e => EF.Functions.ToTsVector(e.Description).Matches(EF.Functions.PlainToTsQuery(SearchQuery)))
+                       select p;
             }
             return View(await data.ToListAsync());
         }
