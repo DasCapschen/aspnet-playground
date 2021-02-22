@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace src.Models
 {
@@ -27,6 +28,10 @@ namespace src.Models
         //[InverseProperty("Protocol")]
         /// single entries with time and description
         public List<ProtocolEntry> Entries { get; set; }
+
+        [ForeignKey("OwnerId")]
+        public IdentityUser Owner { get; set; }
+        public string OwnerId { get; set; }
 
         public class ProtocolEntry
         {
