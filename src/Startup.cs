@@ -44,10 +44,13 @@ namespace src
             services.AddAuthorization(options => {
                 options.AddPolicy("OneDayEditPolicy", policy => 
                     policy.Requirements.Add(new OneDayEditRequirement()));
+                options.AddPolicy("UserIsOwnerPolicy", policy =>
+                    policy.Requirements.Add(new UserIsOwnerRequirement()));
             });
 
             //add the handler for that policy
             services.AddSingleton<IAuthorizationHandler, OneDayEditPolicyHandler>();
+            services.AddSingleton<IAuthorizationHandler, UserIsOwnerPolicyHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
