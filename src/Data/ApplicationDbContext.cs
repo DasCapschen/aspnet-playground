@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -19,10 +20,12 @@ namespace src.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<src.Models.ActivityProtocol.ProtocolEntry>()
-                .HasOne(e => e.Protocol) //configure that entry must have *one* protocol
-                .WithMany(p => p.Entries) //configure that protocol may have *many* entries
-                .IsRequired(); //foreign key may NOT be NULL!
+            builder.Entity<src.Models.ActivityProtocol>(config => {
+                //each protocol owns many entries
+                config.OwnsMany(p => p.Entries).WithOwner(e => e.Protocol);
+                //and has an owner, but owner has no reference to the protocol!
+                config.HasOne(p => p.Owner).WithMany().IsRequired();
+            });
         }
 
         public DbSet<src.Models.ActivityProtocol.ProtocolEntry> ProtocolEntries { get; set; }
