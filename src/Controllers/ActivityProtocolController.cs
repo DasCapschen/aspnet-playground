@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
 using src.Data;
 using src.Models;
+using src.Policies;
 
 namespace src.Controllers
 {
@@ -26,11 +30,14 @@ namespace src.Controllers
         // GET: ActivityProtocol
         public async Task<IActionResult> Index(string SearchQuery = "")
         {
-            IQueryable<ActivityProtocol> data = _context.ActivityProtocols;
-            if(SearchQuery != "") 
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            IQueryable<ActivityProtocol> data = from p in _context.ActivityProtocols
+                where p.OwnerId == userId
+                select p;
+
+            if(SearchQuery != "" && SearchQuery != StringValues.Empty) 
             {
-                //doing this up-front causes exception... "the query switched to client-evaluation"
-                //var tsQuery = EF.Functions.PlainToTsQuery(SearchQuery);
                 //FIXME: this is slow because we do not have an index!
                 data = from p in _context.ActivityProtocols
                        where EF.Functions.ToTsVector(p.JournalEntry).Matches(EF.Functions.PlainToTsQuery(SearchQuery))
@@ -48,11 +55,16 @@ namespace src.Controllers
                 return NotFound();
             }
 
-            var activityProtocol = await _context.ActivityProtocols
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var activityProtocol = await _context.ActivityProtocols.FirstOrDefaultAsync(m => m.Id == id);
             if (activityProtocol == null)
             {
                 return NotFound();
+            }
+
+            var auth = await _authorizationService.AuthorizeAsync(User, activityProtocol, "UserIsOwnerPolicy");
+            if(!auth.Succeeded)
+            {
+                return Forbid();
             }
 
             return View(activityProtocol);
@@ -69,10 +81,15 @@ namespace src.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Date,JournalEntry")] ActivityProtocol activityProtocol)
+        public async Task<IActionResult> Create([Bind("Id,JournalEntry")] ActivityProtocol activityProtocol)
         {
             if (ModelState.IsValid)
             {
+                var ownerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+                activityProtocol.Date = DateTimeOffset.UtcNow;
+                activityProtocol.OwnerId = ownerId;
+
                 _context.Add(activityProtocol);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -94,8 +111,17 @@ namespace src.Controllers
                 return NotFound();
             }
 
-            var auth = await _authorizationService.AuthorizeAsync(User, activityProtocol, "OneDayEditPolicy");
-            if(!auth.Succeeded) {
+            var requirements = new IAuthorizationRequirement[] {
+                new UserIsOwnerRequirement(), new OneDayEditRequirement()
+            };
+            var editAuth = await _authorizationService.AuthorizeAsync(User, activityProtocol, "OneDayEditPolicy");
+            var ownerAuth = await _authorizationService.AuthorizeAsync(User, activityProtocol, "UserIsOwnerPolicy");
+            if(!ownerAuth.Succeeded)
+            {
+                return Forbid();
+            }
+            if(!editAuth.Succeeded)
+            {
                 return View("EditForbidden");
             }
 
@@ -120,10 +146,17 @@ namespace src.Controllers
                 {
                     //get old protocol values (warning: context starts change-tracking it!)
                     ActivityProtocol oldProtocol = _context.ActivityProtocols.First(p => p.Id == id);
-                    var auth = await _authorizationService.AuthorizeAsync(User, oldProtocol, "OneDayEditPolicy");
-                    if(!auth.Succeeded) {
+
+                    //auth action
+                    var requirements = new IAuthorizationRequirement[] {
+                        new UserIsOwnerRequirement(), new OneDayEditRequirement()
+                    };
+                    var auth = await _authorizationService.AuthorizeAsync(User, oldProtocol, requirements);
+                    if(!auth.Succeeded) 
+                    {
                         return Forbid();
                     }
+
                     //detach old protocol so we can update new protocol below
                     _context.Entry(oldProtocol).State = EntityState.Detached;
 
@@ -154,11 +187,18 @@ namespace src.Controllers
                 return NotFound();
             }
 
-            var activityProtocol = await _context.ActivityProtocols
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var activityProtocol = await _context.ActivityProtocols.FirstOrDefaultAsync(m => m.Id == id);
             if (activityProtocol == null)
             {
                 return NotFound();
+            }
+
+            //auth action
+            var requirements = new IAuthorizationRequirement[] { new UserIsOwnerRequirement() };
+            var auth = await _authorizationService.AuthorizeAsync(User, activityProtocol, requirements);
+            if(!auth.Succeeded) 
+            {
+                return Forbid();
             }
 
             return View(activityProtocol);
@@ -170,6 +210,15 @@ namespace src.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var activityProtocol = await _context.ActivityProtocols.FindAsync(id);
+
+            //auth action
+            var requirements = new IAuthorizationRequirement[] { new UserIsOwnerRequirement() };
+            var auth = await _authorizationService.AuthorizeAsync(User, activityProtocol, requirements);
+            if(!auth.Succeeded) 
+            {
+                return Forbid();
+            }
+
             _context.ActivityProtocols.Remove(activityProtocol);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
