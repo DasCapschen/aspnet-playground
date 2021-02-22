@@ -1,20 +1,28 @@
+@using Microsoft.Extensions.Primitives
 @model IEnumerable<src.Models.ActivityProtocol>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Activity Protocols";
+    string searchQuery = Context.Request.Query["SearchQuery"];
 }
 
-<h1>Index</h1>
+<h1>Activity Protocols</h1>
 <p>
     Welcome back, @User.Identity.Name!<br/>
     Why don't you <a asp-action="Create">add a new entry</a>?
 </p>
 <div class="single-line-form">
     <form asp-action="Index" method="get">
-        <input name="SearchQuery" class="form-control"/>
+        <input name="SearchQuery" class="form-control" value="@searchQuery"/>
         <input type="submit" value="Search" class="btn btn-primary"/>
     </form>
 </div>
+<!-- is this the best way to do this? -->
+@if(searchQuery != StringValues.Empty && searchQuery != "") {
+    <a asp-action="Index" class="btn btn-primary margin8">
+        Return to full list
+    </a>
+}
 <table class="table">
     <thead>
         <tr>
@@ -31,7 +39,7 @@
     @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Date)
+                @item.Date.ToString("d")
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.JournalEntry)
