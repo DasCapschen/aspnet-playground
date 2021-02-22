@@ -106,8 +106,10 @@ namespace src.Controllers
                 try
                 {
                     var change = _context.Update(activityProtocol);
-                    //FIXME: this does not work!!
-                    if(DateTimeOffset.UtcNow > ((DateTimeOffset)change.OriginalValues["Date"]).AddHours(24))
+                    //change.property().OriginalValue is already the CHANGED one... what!?
+                    //var max_date = change.Property(p => p.Date).OriginalValue.AddHours(24);
+                    var max_date = change.GetDatabaseValues().GetValue<DateTimeOffset>("Date").AddHours(24);
+                    if(DateTimeOffset.UtcNow > max_date)
                     {
                         //is forbid right here, or should we rather just undo changes?
                         return Forbid();
