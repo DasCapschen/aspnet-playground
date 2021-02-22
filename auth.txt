@@ -1,0 +1,47 @@
+DB hat folgende Tabellen:
+Nutzer und Rollen:
+- AspNetUsers (Id, UserName, Email, PasswordHash, 2FA)
+- AspNetRoles (Id, Name)
+- AspNetUserRoles (UserId, RoleId)
+
+Claims: ??
+- AspNetRoleClaims (Id, RoleId, ClaimType, ClaimValue)
+- AspNetUserClaims (Id, UserId, ClaimType, ClaimValue)
+
+Wahrscheinlich für Third-Party-Login:
+- AspNetUserLogins (LoginProvider, ProviderKey, ProviderDisplayName, UserId)
+- AspNetUserTokens (UserId, LoginProvider, Name, Value)
+
+
+Was sind Claims?
+
+Claim = Behauptung, über bestimmte Eigenschaften zu verfügen.
+ClaimIdentity = Identität die sich aus Claims ergibt.
+ClaimPrincipal = Sammlung von Identitäten desselben Nutzers
+
+bspw könnte ich mich mit Google anmelden, oder mit Github anmelden.
+Diese stellen mglw verschiedene Claims auf, weil ich mich mit verschiedenen
+Emailadressen bei denen registriert hab.
+Daraus ergeben sich verschiedene Identitäten, die aber alle zu mir gehören.
+
+Falls wir dem, der die Behauptung aufstellt, vertrauen (Autorität), 
+dann folgt daraus die Authentifikation des Nutzers.
+Ein authentifizierter Nutzer *kann* dann dazu autorisiert sein bestimmte
+Rechte in anspruch zu nehmen (Posts erstellen, löschen, ...)
+
+Diese Rechte können durch Login, durch Claims oder durch Roles vergeben werden.
+Bsp) Nur eingeloggte Nutzer dürfen Posts lesen (Auth)
+     Nur Nutzer mit Rolle "Admin" darf Post löschen (Role)
+     Nur Nutzer mit bestätigter Email dürfen Post erstellen (Claim)
+
+
+
+Authentifizierung == Authentifikation == Authentikation
+im engl. wird nicht zwischen Authentisierung und Authentifizierung
+
+(authentication claim)
+Authentisierung => Nutzer behauptet Identität durch vorlegen von "Beweisen" (zB Passwort)
+(authentication proof)
+Authentifizierung => Prüfung dieser "Beweise" (zB abgleich Passwort mit DB)
+(authorisation)
+Autorisierung => einräumen spezieller Rechte, die aus der Authentifizierung folgen

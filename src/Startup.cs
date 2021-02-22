@@ -31,8 +31,11 @@ namespace src
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
             services.AddDatabaseDeveloperPageExceptionFilter();
 
+            //use the "Identity" framework to do authentication
+            //any authentication or authorization calls (enabled below in Configure()) will ask this service for auth!
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
             services.AddControllersWithViews();
         }
 
@@ -53,9 +56,21 @@ namespace src
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            //order is important here! This is a pipeline!
+            //1) check where we are going
+            //2) check who we are
+            //3) check if we are allowed to go there
+            //used by the [Authorize] annotation for example
+
+            //find out where we need to go
+            //ex: site.com/Home/Privacy
+            //calls HomeController.Privacy()
+            //see Endpoints below for things we can route to
             app.UseRouting();
 
+            //first authenticate (prove who you are)
             app.UseAuthentication();
+            //then authorize (check if you're allowed to do something)
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
