@@ -79,10 +79,13 @@ namespace src.Controllers
         // POST: ActivityProtocol/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // outdated, I think
+        // see here instead https://docs.microsoft.com/en-us/aspnet/core/data/ef-mvc/crud?view=aspnetcore-5.0
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,JournalEntry")] ActivityProtocol activityProtocol)
+        public async Task<IActionResult> Create([Bind("JournalEntry")] ActivityProtocol activityProtocol)
         {
+            //TODO: should try-catch this 
             if (ModelState.IsValid)
             {
                 var ownerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -131,52 +134,45 @@ namespace src.Controllers
         // POST: ActivityProtocol/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Date,JournalEntry")] ActivityProtocol activityProtocol)
+        public async Task<IActionResult> EditProtocol(int id)
         {
-            if (id != activityProtocol.Id)
+            //find protocol (DB hit!!)
+            var protocol = await _context.ActivityProtocols.FindAsync(id);
+
+            //auth action
+            var requirements = new IAuthorizationRequirement[] {
+                new UserIsOwnerRequirement(), new OneDayEditRequirement()
+            };
+            var auth = await _authorizationService.AuthorizeAsync(User, protocol, requirements);
+            if(!auth.Succeeded)
             {
-                return NotFound();
+                return Forbid();
             }
 
-            if (ModelState.IsValid)
+            // yay, this actually worked, I am no longer able to POST-inject data \o/
+            // ffs, the Id of the post is still in the HTML code ... :|
+            // <form action="Edit/18"> for example. I can change the ID there and edit a post I didn't want to...
+            // I guess there is nothing I can do about that?
+            // same goes for deleting...
+
+            //no need to detach anymore, because we are not tracking changes yet (?)
+            //this is what ModelState.IsValid used to do for us, now we do it explicit:
+            var updateSuccess = await TryUpdateModelAsync<ActivityProtocol>(protocol, "", p => p.JournalEntry);
+            if (updateSuccess)
             {
                 try
                 {
-                    //get old protocol values (warning: context starts change-tracking it!)
-                    ActivityProtocol oldProtocol = _context.ActivityProtocols.First(p => p.Id == id);
-
-                    //auth action
-                    var requirements = new IAuthorizationRequirement[] {
-                        new UserIsOwnerRequirement(), new OneDayEditRequirement()
-                    };
-                    var auth = await _authorizationService.AuthorizeAsync(User, oldProtocol, requirements);
-                    if(!auth.Succeeded) 
-                    {
-                        return Forbid();
-                    }
-
-                    //detach old protocol so we can update new protocol below
-                    _context.Entry(oldProtocol).State = EntityState.Detached;
-
-                    var change = _context.Update(activityProtocol);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateException)
                 {
-                    if (!ActivityProtocolExists(activityProtocol.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                   throw; //TODO: handle error
                 }
-                return RedirectToAction(nameof(Index));
             }
-            return View(activityProtocol);
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: ActivityProtocol/Delete/5
