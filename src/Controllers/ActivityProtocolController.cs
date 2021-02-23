@@ -95,6 +95,7 @@ namespace src.Controllers
         // see here instead https://docs.microsoft.com/en-us/aspnet/core/data/ef-mvc/crud?view=aspnetcore-5.0
         [HttpPost]
         [ValidateAntiForgeryToken]
+        //TODO: allowing all of Entries is probably a bad idea! Only allow Entry.Time and Entry.Description. But how?
         public async Task<IActionResult> Create([Bind("JournalEntry,Entries")] ActivityProtocol activityProtocol)
         {
             //TODO: should try-catch this 
@@ -107,9 +108,9 @@ namespace src.Controllers
 
                 _context.Add(activityProtocol);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Details), new { id = activityProtocol.Id } );
             }
-            return View(activityProtocol);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: ActivityProtocol/Edit/5
@@ -173,6 +174,9 @@ namespace src.Controllers
             //this is what ModelState.IsValid used to do for us, now we do it explicit:
             var updateSuccess = await TryUpdateModelAsync<ActivityProtocol>(protocol, "", 
                 p => p.JournalEntry, p => p.Entries);
+
+            //TODO: allowing all of p.Entries is probably a bad idea! Only allow Entry.Time and Entry.Description. But how?
+
             if (updateSuccess)
             {
                 try
@@ -185,7 +189,7 @@ namespace src.Controllers
                 }
             }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Details), new { id = id });
         }
 
         // GET: ActivityProtocol/Delete/5
