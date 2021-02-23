@@ -171,7 +171,8 @@ namespace src.Controllers
 
             //no need to detach anymore, because we are not tracking changes yet (?)
             //this is what ModelState.IsValid used to do for us, now we do it explicit:
-            var updateSuccess = await TryUpdateModelAsync<ActivityProtocol>(protocol, "", p => p.JournalEntry);
+            var updateSuccess = await TryUpdateModelAsync<ActivityProtocol>(protocol, "", 
+                p => p.JournalEntry, p => p.Entries);
             if (updateSuccess)
             {
                 try

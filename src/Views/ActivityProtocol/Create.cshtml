@@ -9,10 +9,11 @@
 <h4>@DateTimeOffset.UtcNow.ToString("D")</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-10">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group" id="dynEntries">
+                <partial name="_NewEntryPartial" view-data='@new ViewDataDictionary(ViewData){ {"Index", 0} }'/>
             </div>
             <button id="AddEntry" type="button" class="btn btn-primary" onclick="add_new_protocol_entry()">Add Protocol Entry</button>
             <!-- thank you, StackOverflow. I have no idea what I'm doing here -->
