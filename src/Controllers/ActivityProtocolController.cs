@@ -55,7 +55,12 @@ namespace src.Controllers
                 return NotFound();
             }
 
-            var activityProtocol = await _context.ActivityProtocols.FirstOrDefaultAsync(m => m.Id == id);
+            var activityProtocol = await 
+                _context.ActivityProtocols  //query protocols
+                .Include(p => p.Entries)    //include entries in query
+                .AsNoTracking()             //don't track changes, we only display stuff!
+                .FirstOrDefaultAsync(p => p.Id == id); //get the protocol with this ID
+
             if (activityProtocol == null)
             {
                 return NotFound();

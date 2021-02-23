@@ -90,3 +90,7 @@ textarea {
   overflow: auto;
   resize: both;
 }
+
+.multiline {
+  white-space: pre-wrap;
+}
