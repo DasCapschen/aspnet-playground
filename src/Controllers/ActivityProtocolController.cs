@@ -81,6 +81,13 @@ namespace src.Controllers
             return View();
         }
 
+        // TODO FIXME: is accessible from URL!!!
+        public IActionResult AddProtocolEntry(int index)
+        {
+            ViewData["Index"] = index;
+            return PartialView("_NewEntryPartial");
+        }
+
         // POST: ActivityProtocol/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -88,7 +95,7 @@ namespace src.Controllers
         // see here instead https://docs.microsoft.com/en-us/aspnet/core/data/ef-mvc/crud?view=aspnetcore-5.0
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("JournalEntry")] ActivityProtocol activityProtocol)
+        public async Task<IActionResult> Create([Bind("JournalEntry,Entries")] ActivityProtocol activityProtocol)
         {
             //TODO: should try-catch this 
             if (ModelState.IsValid)

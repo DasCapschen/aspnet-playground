@@ -12,6 +12,12 @@
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group" id="dynEntries">
+            </div>
+            <button id="AddEntry" type="button" class="btn btn-primary" onclick="add_new_protocol_entry()">Add Protocol Entry</button>
+            <!-- thank you, StackOverflow. I have no idea what I'm doing here -->
+            <!-- https://stackoverflow.com/questions/36317362/how-to-add-an-item-to-a-list-in-a-viewmodel-using-razor-and-net-core -->
+            <hr/>
             <div class="form-group">
                 <label asp-for="JournalEntry" class="control-label"></label>
                 <textarea asp-for="JournalEntry" class="form-control"></textarea>

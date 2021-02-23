@@ -16,6 +16,11 @@ namespace src.Models
         //everything needs to be public because else code generation complains
         //not 100% sure why yet
 
+        public ActivityProtocol() 
+        {
+            Entries = new List<ProtocolEntry>();
+        }
+
         //need a primary key, because database
         [Key]
         public int Id { get; set; }

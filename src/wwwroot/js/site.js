@@ -2,3 +2,13 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
+
+function add_new_protocol_entry() {
+    var i = $(".ProtocolEntryForm").length;
+    $.ajax({
+        url: 'AddProtocolEntry?index=' + i,
+        success: function (data) {
+            $('#dynEntries').append(data)
+        }
+    });
+}

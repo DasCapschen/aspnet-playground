@@ -1,0 +1,12 @@
+@{
+    int index = (int)ViewData["Index"];
+}
+
+<div class="ProtocolEntryForm">
+    <div class="flex-row">
+        <input type="time" class="form-control" data-val="true" data-val-required="The Time field is required." id="Entries_@(index)__Time" name="Entries[@(index)].Time" value="">
+        <input type="text" class="form-control" data-val="true" data-val-maxlength="The field Description must be a string or array type with a maximum length of '200'." data-val-maxlength-max="200" id="Entries_@(index)__Description" maxlength="200" name="Entries[@(index)].Description" value="">
+    </div>
+    <span class="text-danger field-validation-valid" data-valmsg-for="Entries[@(index)].Time" data-valmsg-replace="true"></span>
+    <span class="text-danger field-validation-valid" data-valmsg-for="Entries[@(index)].Description" data-valmsg-replace="true"></span>
+</div>
