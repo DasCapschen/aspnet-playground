@@ -4,17 +4,17 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
-
-<h4>ActivityProtocol</h4>
+<!-- use Users timezone to display DateTime?? -->
+<h1>Create a new Activity Protocol</h1>
+<h4>@DateTimeOffset.UtcNow.ToString("D")</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="JournalEntry" class="control-label">Journal Entry</label>
-                <input asp-for="JournalEntry" class="form-control" />
+                <label asp-for="JournalEntry" class="control-label"></label>
+                <textarea asp-for="JournalEntry" class="form-control"></textarea>
                 <span asp-validation-for="JournalEntry" class="text-danger"></span>
             </div>
             <div class="form-group">
