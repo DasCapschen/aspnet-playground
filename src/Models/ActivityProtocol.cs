@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
@@ -18,9 +19,12 @@ namespace src.Models
         //need a primary key, because database
         [Key]
         public int Id { get; set; }
+        
         /// on which date this protocol was created
         public DateTimeOffset Date { get; set; }
+
         /// single journal entry for this day (unlimited length)
+        [DisplayName("Journal Entry")]
         public string JournalEntry { get; set; }
 
         //instead of configuring the relationship in ApplicationDbContext
