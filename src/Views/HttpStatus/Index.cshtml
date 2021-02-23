@@ -1,0 +1,10 @@
+@model System.Net.HttpStatusCode
+@{
+    ViewData["Title"] = "Error " + (int)Model;
+}
+
+<div class="oh-cock">
+    <h1>Error @((int)Model)</h1>
+    <h3>I guess the page is not coming on then?</h3>
+    <p><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></p>
+</div>
