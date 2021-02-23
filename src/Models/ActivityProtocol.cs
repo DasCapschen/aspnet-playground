@@ -42,8 +42,11 @@ namespace src.Models
             // need primary key because database
             [Key]
             public int Id { get; set; }
-            /// description of users activity (TODO: max length)
+
+            /// description of users activity
+            [MaxLength(200)]
             public string Description { get; set; }
+
             /// when this entry was added
             public DateTimeOffset Time { get; set; }
 
