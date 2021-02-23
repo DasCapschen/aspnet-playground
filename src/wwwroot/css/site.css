@@ -94,3 +94,13 @@ textarea {
 .multiline {
   white-space: pre-wrap;
 }
+
+.fixed-table {
+  table-layout: fixed;
+}
+
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

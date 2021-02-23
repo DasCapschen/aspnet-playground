@@ -23,16 +23,16 @@
         Return to full list
     </a>
 }
-<table class="table">
+<table class="table fixed-table">
     <thead>
         <tr>
-            <th>
+            <th style="width: 100px;">
                 @Html.DisplayNameFor(model => model.Date)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.JournalEntry)
             </th>
-            <th></th>
+            <th style="width: 175px;"></th>
         </tr>
     </thead>
     <tbody>
@@ -41,7 +41,7 @@
             <td>
                 @item.Date.ToString("d")
             </td>
-            <td>
+            <td class="text-ellipsis">
                 @Html.DisplayFor(modelItem => item.JournalEntry)
             </td>
             <td>
