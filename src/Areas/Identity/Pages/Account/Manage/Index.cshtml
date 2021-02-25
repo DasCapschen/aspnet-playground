@@ -22,12 +22,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="Input.Culture"></label>
-                <input asp-for="Input.Culture" class="form-control" />
+                <select asp-for="Input.Culture" asp-items="Model.Input.AvailableCultures" class="form-control"></select>
                 <span asp-validation-for="Input.Culture" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Input.TimeZone"></label>
-                <input asp-for="Input.TimeZone" class="form-control" />
+                <select asp-for="Input.TimeZone" asp-items="Model.Input.AvailableTimeZones" class="form-control"></select>
                 <span asp-validation-for="Input.TimeZone" class="text-danger"></span>
             </div>
             <button id="update-profile-button" type="submit" class="btn btn-primary">Save</button>

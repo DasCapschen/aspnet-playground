@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Primitives;
 using src.Areas.Identity.Data;
 using src.Validation;
@@ -46,6 +48,32 @@ namespace src.Areas.Identity.Pages.Account.Manage
             [ValidateTimeZone]
             [Display(Name = "Time Zone")]
             public string TimeZone { get; set; } = "UTC";
+
+            public List<SelectListItem> AvailableCultures { get; }
+            public List<SelectListItem> AvailableTimeZones { get; }
+
+            public InputModel()
+            {
+                AvailableCultures = new List<SelectListItem>();
+                var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
+                foreach(var culture in cultures)
+                {
+                    AvailableCultures.Add(new SelectListItem{
+                        Value = culture.Name,
+                        Text = culture.DisplayName
+                    });
+                }
+
+                AvailableTimeZones = new List<SelectListItem>();
+                var timezones = TimeZoneInfo.GetSystemTimeZones();
+                foreach(var timezone in timezones)
+                {
+                    AvailableTimeZones.Add(new SelectListItem{
+                        Value = timezone.Id,
+                        Text = timezone.Id // displayName isn't really that good tbh
+                    });
+                }
+            }
         }
 
         private async Task LoadAsync(ApplicationUser user)
