@@ -27,7 +27,7 @@ namespace src.Models
         public int Id { get; set; }
         
         /// on which date this protocol was created
-        public DateTimeOffset Date { get; set; }
+        public DateTime Date { get; set; }
 
         /// single journal entry for this day (unlimited length)
         [DisplayName("Journal Entry")]
@@ -54,7 +54,7 @@ namespace src.Models
             public string Description { get; set; }
 
             /// when this entry was added
-            public DateTimeOffset Time { get; set; }
+            public DateTime Time { get; set; }
 
             //needed because list in protocol class!
             [ForeignKey("ProtocolId")]

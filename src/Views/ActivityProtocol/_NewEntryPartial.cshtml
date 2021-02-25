@@ -1,4 +1,11 @@
+@using System.Globalization;
+@using src.Extensions;
+
 @{
+    CultureInfo.CurrentCulture = new CultureInfo(User.GetCulture());
+    CultureInfo.CurrentUICulture = new CultureInfo(User.GetCulture());
+    var timeZone = TimeZoneInfo.FindSystemTimeZoneById(User.GetTimeZone());
+
     int index = 0;
     string timeValue = "12:00";
     string descValue = "";
@@ -7,7 +14,9 @@
     }
     if(ViewData.ContainsKey("TimeValue")) {
         // do NOT use localization! input type time only accepts 24h format! (no AM/PM stuff)
-        timeValue = ((DateTimeOffset)ViewData["TimeValue"]).ToString("t");
+        var utcTime = (DateTime)ViewData["TimeValue"];
+        var userTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, timeZone);
+        timeValue = userTime.ToString("t");
     }
     if(ViewData.ContainsKey("DescValue")) {
         descValue = (string)ViewData["DescValue"];

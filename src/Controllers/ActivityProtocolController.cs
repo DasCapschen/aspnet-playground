@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 using src.Data;
+using src.Extensions;
 using src.Models;
 using src.Policies;
 
@@ -25,6 +26,12 @@ namespace src.Controllers
         {
             _context = context;
             _authorizationService = authorizationService;
+        }
+
+        private DateTime ConvertTimeToUTC(DateTime time)
+        {
+            var timezone = TimeZoneInfo.FindSystemTimeZoneById(User.GetTimeZone());
+            return TimeZoneInfo.ConvertTimeToUtc(time, timezone);
         }
 
         // GET: ActivityProtocol
@@ -96,19 +103,29 @@ namespace src.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         //TODO: allowing all of Entries is probably a bad idea! Only allow Entry.Time and Entry.Description. But how?
-        public async Task<IActionResult> Create([Bind("JournalEntry,Entries")] ActivityProtocol activityProtocol)
+        public async Task<IActionResult> Create([Bind("JournalEntry,Entries")] ActivityProtocol protocol)
         {
             //TODO: should try-catch this 
             if (ModelState.IsValid)
             {
                 var ownerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-                activityProtocol.Date = DateTimeOffset.UtcNow;
-                activityProtocol.OwnerId = ownerId;
+                protocol.Date = DateTime.UtcNow;
+                protocol.OwnerId = ownerId;
 
-                _context.Add(activityProtocol);
+                //time in HTML form has NO timezone information!! arrives in Users Timezone,
+                //we need to save as UTC, so convert...
+                for(int i = 0; i < protocol.Entries.Count; i++)
+                {
+                    protocol.Entries[i].Time = ConvertTimeToUTC(protocol.Entries[i].Time);
+                }
+
+                _context.Add(protocol);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Details), new { id = activityProtocol.Id } );
+
+
+
+                return RedirectToAction(nameof(Details), new { id = protocol.Id } );
             }
             return RedirectToAction(nameof(Index));
         }
@@ -174,6 +191,15 @@ namespace src.Controllers
             //this is what ModelState.IsValid used to do for us, now we do it explicit:
             var updateSuccess = await TryUpdateModelAsync<ActivityProtocol>(protocol, "", 
                 p => p.JournalEntry, p => p.Entries);
+
+            // remember to edit entries AFTER TryUpdate!!! we're not tracking changes before!!!
+
+            //time in HTML form has NO timezone information!! arrives in Users Timezone,
+            //we need to save as UTC, so convert...
+            for(int i = 0; i < protocol.Entries.Count; i++)
+            {
+                protocol.Entries[i].Time = ConvertTimeToUTC(protocol.Entries[i].Time);
+            }
 
             //TODO: allowing all of p.Entries is probably a bad idea! Only allow Entry.Time and Entry.Description. But how?
 

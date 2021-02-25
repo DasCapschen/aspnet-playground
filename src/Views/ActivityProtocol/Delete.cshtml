@@ -1,8 +1,13 @@
 @using System.Globalization
+@using src.Extensions;
 @model src.Models.ActivityProtocol
 
 @{
     ViewData["Title"] = "Delete";
+
+    CultureInfo.CurrentCulture = new CultureInfo(User.GetCulture());
+    CultureInfo.CurrentUICulture = new CultureInfo(User.GetCulture());
+    var timeZone = TimeZoneInfo.FindSystemTimeZoneById(User.GetTimeZone());
 }
 
 <h1>Delete</h1>
@@ -14,7 +19,7 @@
             @Html.DisplayNameFor(model => model.Date)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Date.ToString("D", CultureInfo.CurrentCulture))
+            @TimeZoneInfo.ConvertTimeFromUtc(Model.Date, timeZone).ToString("D", CultureInfo.CurrentCulture)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.JournalEntry)

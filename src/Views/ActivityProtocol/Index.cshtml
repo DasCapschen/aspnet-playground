@@ -1,10 +1,15 @@
 @using System.Globalization;
 @using Microsoft.Extensions.Primitives
+@using src.Extensions;
 @model IEnumerable<src.Models.ActivityProtocol>
 
 @{
     ViewData["Title"] = "Activity Protocols";
     string searchQuery = Context.Request.Query["SearchQuery"];
+
+    CultureInfo.CurrentCulture = new CultureInfo(User.GetCulture());
+    CultureInfo.CurrentUICulture = new CultureInfo(User.GetCulture());
+    var timeZone = TimeZoneInfo.FindSystemTimeZoneById(User.GetTimeZone());
 }
 
 <h1>Activity Protocols</h1>
@@ -15,7 +20,7 @@
 
 <p> 
     Your Current Culture is @CultureInfo.CurrentCulture.DisplayName <br/>
-    And the UI Culture is @CultureInfo.CurrentUICulture.DisplayName
+    Your Time Zone is @timeZone.DisplayName
 </p>
 
 <div class="single-line-form">
@@ -46,7 +51,7 @@
     @foreach (var item in Model) {
         <tr>
             <td>
-                @item.Date.ToString("d", CultureInfo.CurrentCulture)
+                @TimeZoneInfo.ConvertTimeFromUtc(item.Date, timeZone).ToString("d", CultureInfo.CurrentCulture)
             </td>
             <td class="text-ellipsis">
                 @Html.DisplayFor(modelItem => item.JournalEntry)

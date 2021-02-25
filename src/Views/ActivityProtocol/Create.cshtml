@@ -1,13 +1,18 @@
 @using System.Globalization;
+@using src.Extensions;
 @model src.Models.ActivityProtocol
 
 @{
     ViewData["Title"] = "Create";
+
+    CultureInfo.CurrentCulture = new CultureInfo(User.GetCulture());
+    CultureInfo.CurrentUICulture = new CultureInfo(User.GetCulture());
+    var timeZone = TimeZoneInfo.FindSystemTimeZoneById(User.GetTimeZone());
 }
 
 <!-- use Users timezone to display DateTime?? -->
 <h1>Create a new Activity Protocol</h1>
-<h4>@DateTimeOffset.UtcNow.ToString("D", CultureInfo.CurrentCulture)</h4>
+<h4>@TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone).ToString("D", CultureInfo.CurrentCulture)</h4>
 <hr />
 <div class="row">
     <div class="col-md-10">

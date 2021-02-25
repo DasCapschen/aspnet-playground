@@ -1,20 +1,25 @@
 @using System.Globalization
+@using src.Extensions;
 @model src.Models.ActivityProtocol
 
 @{
     ViewData["Title"] = "Details";
+
+    CultureInfo.CurrentCulture = new CultureInfo(User.GetCulture());
+    CultureInfo.CurrentUICulture = new CultureInfo(User.GetCulture());
+    var timeZone = TimeZoneInfo.FindSystemTimeZoneById(User.GetTimeZone());
 }
 
 <h1>Details</h1>
 
 <div>
-    <h4>@Model.Date.ToString("D", CultureInfo.CurrentCulture)</h4>
+    <h4>@TimeZoneInfo.ConvertTimeFromUtc(Model.Date, timeZone).ToString("D", CultureInfo.CurrentCulture)</h4>
     @if(Model.Entries.Count > 0) {
         <hr />
         <dl class="row">
             @foreach(var entry in Model.Entries) 
             {
-                <dt class = "col-sm-2">@entry.Time.ToString("t", CultureInfo.CurrentCulture)</dt>
+                <dt class = "col-sm-2">@TimeZoneInfo.ConvertTimeFromUtc(entry.Time, timeZone).ToString("t", CultureInfo.CurrentCulture)</dt>
                 <dd class = "col-sm-10">@Html.DisplayFor(model => entry.Description)</dd>
             }
         </dl>
