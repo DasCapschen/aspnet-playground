@@ -1,3 +1,4 @@
+@using System.Globalization
 @model src.Models.ActivityProtocol
 
 @{
@@ -7,13 +8,13 @@
 <h1>Details</h1>
 
 <div>
-    <h4>@Model.Date.ToString("D")</h4>
+    <h4>@Model.Date.ToString("D", CultureInfo.CurrentCulture)</h4>
     @if(Model.Entries.Count > 0) {
         <hr />
         <dl class="row">
             @foreach(var entry in Model.Entries) 
             {
-                <dt class = "col-sm-2">@entry.Time.ToString("t")</dt>
+                <dt class = "col-sm-2">@entry.Time.ToString("t", CultureInfo.CurrentCulture)</dt>
                 <dd class = "col-sm-10">@Html.DisplayFor(model => entry.Description)</dd>
             }
         </dl>

@@ -1,3 +1,4 @@
+@using System.Globalization;
 @model src.Models.ActivityProtocol
 
 @{
@@ -6,7 +7,7 @@
 
 <!-- use Users timezone to display DateTime?? -->
 <h1>Create a new Activity Protocol</h1>
-<h4>@DateTimeOffset.UtcNow.ToString("D")</h4>
+<h4>@DateTimeOffset.UtcNow.ToString("D", CultureInfo.CurrentCulture)</h4>
 <hr />
 <div class="row">
     <div class="col-md-10">
