@@ -25,5 +25,28 @@ services:
     working_dir: /src
     command: bash
 
+  devcontainer:
+    #use the devcontainer Dockerfile
+    build:
+      context: ../
+      # relative to context!!
+      dockerfile: .devcontainer/Dockerfile
+      args:
+        VARIANT: "5.0"
+        INSTALL_NODE: "false"
+        INSTALL_AZURE_CLI: "false"
+        UID: ${UID}
+        GID: ${GID}
+    # Overrides default command so things don't shut down after the process ends.
+    # yes, this is what microsoft recommends! (https://code.visualstudio.com/docs/remote/create-dev-container#_use-docker-compose)
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    # mount our project in the container, and cache that
+    # relative to docker-compose.yml path, NOT relative to context!!
+    volumes:
+      - ..:/workspace:cached
+    working_dir: /workspace
+    # run on the same network as db so they can connect!
+    network_mode: service:db
+
 volumes:
   aspnet_playground_db_volume:
