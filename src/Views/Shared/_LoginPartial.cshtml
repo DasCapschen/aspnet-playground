@@ -1,7 +1,8 @@
 @using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
+@using src.Areas.Identity.Data
+@inject SignInManager<ApplicationUser> SignInManager
 <!-- Why do we need UserManager? we never use it, do we? -->
-@inject UserManager<IdentityUser> UserManager
+@inject UserManager<ApplicationUser> UserManager
 
 <ul class="navbar-nav">
 <!-- Where does the variable "User" come from? -->

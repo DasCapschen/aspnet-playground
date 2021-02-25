@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using src.Policies;
 using Microsoft.AspNetCore.Authorization;
+using src.Areas.Identity.Data;
 
 namespace src
 {
@@ -35,7 +36,7 @@ namespace src
 
             //use the "Identity" framework to do authentication
             //any authentication or authorization calls (enabled below in Configure()) will ask this service for auth!
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddControllersWithViews();

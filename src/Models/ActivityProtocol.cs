@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
+using src.Areas.Identity.Data;
 
 namespace src.Models
 {
@@ -39,7 +40,7 @@ namespace src.Models
         public List<ProtocolEntry> Entries { get; set; }
 
         [ForeignKey("OwnerId")]
-        public IdentityUser Owner { get; set; }
+        public ApplicationUser Owner { get; set; }
         public string OwnerId { get; set; }
 
         public class ProtocolEntry
