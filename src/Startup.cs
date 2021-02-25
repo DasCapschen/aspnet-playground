@@ -39,8 +39,9 @@ namespace src
             services.AddDefaultIdentity<ApplicationUser>(options => {
                 options.SignIn.RequireConfirmedAccount = true;
                 options.User.RequireUniqueEmail = true;
-            })
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            }).AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddScoped<SignInManager<ApplicationUser>, ApplicationSignInManager>();
 
             services.AddControllersWithViews();
 
