@@ -80,24 +80,13 @@ namespace src.Areas.Identity.Pages.Account.Manage
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            var culture = "en-US";
-            var timezone = "UTC";
-
-            if(user.Culture != StringValues.Empty && user.Culture != "")
-            {
-                culture = user.Culture;
-            }
-            if(user.TimeZoneId != StringValues.Empty && user.TimeZoneId != "")
-            {
-                timezone = user.TimeZoneId;
-            }
 
             Username = userName;
             Input = new InputModel
             {
                 PhoneNumber = phoneNumber,
-                Culture = culture,
-                TimeZone = timezone,
+                Culture = user.Culture,
+                TimeZone = user.TimeZoneId,
             };
         }
 
