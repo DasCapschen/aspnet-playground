@@ -1,4 +1,4 @@
-version: '3'
+version: '3.3'
 services:
   web:
     image: aspnet-playground
@@ -35,8 +35,6 @@ services:
         VARIANT: "5.0"
         INSTALL_NODE: "false"
         INSTALL_AZURE_CLI: "false"
-        UID: ${UID}
-        GID: ${GID}
     # Overrides default command so things don't shut down after the process ends.
     # yes, this is what microsoft recommends! (https://code.visualstudio.com/docs/remote/create-dev-container#_use-docker-compose)
     command: /bin/sh -c "while sleep 1000; do :; done"
@@ -47,6 +45,14 @@ services:
     working_dir: /workspace
     # run on the same network as db so they can connect!
     network_mode: service:db
+    #add git ssh key to allow pushing from container :)
+    secrets:
+      - git_ssh_key
+
+# apparently needs version 3.3, version 3 not enough
+secrets:
+  git_ssh_key:
+    file: ~/.ssh/id_rsa
 
 volumes:
   aspnet_playground_db_volume:

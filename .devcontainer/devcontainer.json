@@ -21,7 +21,8 @@
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
-		"terminal.integrated.shell.linux": "/bin/zsh"
+		"terminal.integrated.shell.linux": "/bin/zsh",
+		"terminal.integrated.inheritEnv": true
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
@@ -31,6 +32,15 @@
 
 	//I hope postCreate is correct, there's also postAttach and postStart :thinking:
 	"postCreateCommand": "dotnet restore src/src.csproj",
+
+	//set path so we can find dotnet-ef and dotnet-aspnet-codegeneration
+	//don't set PATH, it breaks everything D:
+	//"remoteEnv": {
+	//	"PATH": "$PATH:$HOME/.dotnet/tools"
+	//},
+
+	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "vscode",
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [ 8182 ],
@@ -57,10 +67,4 @@
 	//
 	//    * If only using Remote - Containers with a local container, uncomment this line instead:
 	//      "mounts": [ "source=${env:HOME}${env:USERPROFILE}/.aspnet/https,target=/home/vscode/.aspnet/https,type=bind" ],
-
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "dotnet restore",
-
-	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "vscode"
 }

@@ -12,6 +12,10 @@ ARG INSTALL_AZURE_CLI="false"
 #added by the base image, hope this works
 USER vscode
 
+# copy ssh key (docker secret) into container
+# allows using git from container
+RUN mkdir -p $HOME/.ssh && ln -s /run/secrets/git_ssh_key $HOME/.ssh/id_rsa
+
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 # Entity Framework (ORM) ; does database stuff for us
@@ -19,7 +23,8 @@ RUN dotnet tool install --global dotnet-ef
 # Code Generation ; helps make Controllers etc for us
 RUN dotnet tool install --global dotnet-aspnet-codegenerator
 # make installed tools available
-ENV PATH="$PATH:$HOME/.dotnet/tools"
+# apprently $HOME is not set :rolling_eyes:
+ENV PATH="$PATH:/home/vscode/.dotnet/tools"
 
 # used for project.sh to determine new vs old workflow :)
 ENV IS_DEV_CONTAINER=1
