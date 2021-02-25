@@ -36,7 +36,10 @@ namespace src
 
             //use the "Identity" framework to do authentication
             //any authentication or authorization calls (enabled below in Configure()) will ask this service for auth!
-            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<ApplicationUser>(options => {
+                options.SignIn.RequireConfirmedAccount = true;
+                options.User.RequireUniqueEmail = true;
+            })
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddControllersWithViews();
