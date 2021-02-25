@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Primitives;
 using src.Areas.Identity.Data;
+using src.Validation;
 
 namespace src.Areas.Identity.Pages.Account.Manage
 {
@@ -36,18 +38,38 @@ namespace src.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+
+            [ValidateCulture]
+            [Display(Name = "Language")]
+            public string Culture { get; set; } = "en-US";
+
+            [ValidateTimeZone]
+            [Display(Name = "Time Zone")]
+            public string TimeZone { get; set; } = "UTC";
         }
 
         private async Task LoadAsync(ApplicationUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+            var culture = "en-US";
+            var timezone = "UTC";
+
+            if(user.Culture != StringValues.Empty && user.Culture != "")
+            {
+                culture = user.Culture;
+            }
+            if(user.TimeZoneId != StringValues.Empty && user.TimeZoneId != "")
+            {
+                timezone = user.TimeZoneId;
+            }
 
             Username = userName;
-
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                Culture = culture,
+                TimeZone = timezone,
             };
         }
 
@@ -87,6 +109,16 @@ namespace src.Areas.Identity.Pages.Account.Manage
                     return RedirectToPage();
                 }
             }
+            if(Input.Culture != user.Culture)
+            {
+                user.Culture = Input.Culture;
+            }
+            if(Input.TimeZone != user.TimeZoneId)
+            {
+                user.TimeZoneId = Input.TimeZone;
+            }
+
+            await _userManager.UpdateAsync(user);
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";

@@ -6,6 +6,7 @@
         index = (int)ViewData["Index"];
     }
     if(ViewData.ContainsKey("TimeValue")) {
+        // do NOT use localization! input type time only accepts 24h format! (no AM/PM stuff)
         timeValue = ((DateTimeOffset)ViewData["TimeValue"]).ToString("t");
     }
     if(ViewData.ContainsKey("DescValue")) {
