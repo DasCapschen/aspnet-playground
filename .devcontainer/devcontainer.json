@@ -27,7 +27,8 @@
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
-		"ms-dotnettools.csharp"
+		"ms-dotnettools.csharp",
+		"gruntfuggly.todo-tree"
 	],
 
 	//I hope postCreate is correct, there's also postAttach and postStart :thinking:
