@@ -37,6 +37,14 @@ namespace src.Controllers
         // GET: ActivityProtocol
         public async Task<IActionResult> Index(string SearchQuery = "")
         {
+            /*  even though user now owns ActivityProtocol with reference to it,
+             *  we cannot use User.Protocols, because we cannot search query on that :/
+             *  if we just straight up returned it, it would work though
+             *  we cannot use 
+             *    from u in _context.Users select u.Protocols; 
+             *  because that returns IQueryable<List<ActivityProtocol>>
+             */
+
             var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
             IQueryable<ActivityProtocol> data = from p in _context.ActivityProtocols

@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.AspNetCore.Identity;
+using src.Models;
 
 namespace src.Areas.Identity.Data
 {
@@ -11,6 +13,9 @@ namespace src.Areas.Identity.Data
 
         //TimeZoneInfo, eg "Europe/Berlin" :)
         public string TimeZoneId { get; set; } = "UTC";
+
+        //list of protocols this User owns
+        public List<ActivityProtocol> Protocols { get; set; }
 
         public ApplicationUser()
             : base()

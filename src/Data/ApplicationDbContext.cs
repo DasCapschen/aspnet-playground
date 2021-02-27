@@ -21,11 +21,17 @@ namespace src.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<src.Models.ActivityProtocol>(config => {
-                //each protocol owns many entries
-                config.OwnsMany(p => p.Entries).WithOwner(e => e.Protocol);
-                //and has an owner, but owner has no reference to the protocol!
-                config.HasOne(p => p.Owner).WithMany().IsRequired();
+            builder.Entity<ApplicationUser>(user_config => {
+                //each user owns many protocols
+                user_config.OwnsMany(
+                    user => user.Protocols,
+                    protocol_config => {
+                        //protocol has owner 
+                        protocol_config.WithOwner(protocol => protocol.Owner);
+                        //protocol owns many entries
+                        protocol_config.OwnsMany(protocol => protocol.Entries).WithOwner(entry => entry.Protocol);
+                    }
+                );
             });
         }
 
