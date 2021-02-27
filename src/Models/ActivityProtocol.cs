@@ -40,9 +40,9 @@ namespace src.Models
         /// single entries with time and description
         public List<ProtocolEntry> Entries { get; set; }
 
-        [ForeignKey("OwnerId")]
-        public ApplicationUser Owner { get; set; }
-        public string OwnerId { get; set; }
+        [ForeignKey("UserId")]
+        public ApplicationUser User { get; set; }
+        public string UserId { get; set; }
 
         public class ProtocolEntry
         {

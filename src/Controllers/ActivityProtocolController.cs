@@ -39,13 +39,21 @@ namespace src.Controllers
             return TimeZoneInfo.ConvertTimeToUtc(time, timezone);
         }
 
+        //really?
+        private IQueryable<ActivityProtocol> QueryUserProtocols()
+        {
+            var userId = _userManager.GetUserId(User);
+            return _context.Users.Where(u => u.Id == userId).SelectMany(u => u.Protocols).Include(p => p.Entries).AsNoTracking();
+        }
+        private async Task<ActivityProtocol> GetUserProtocolAsync(int id)
+        {
+            return await QueryUserProtocols().Where(p => p.Id == id).FirstOrDefaultAsync();
+        }
+
         // GET: ActivityProtocol
         public async Task<IActionResult> Index(string SearchQuery = "")
         {
-            var userId = _userManager.GetUserId(User);
-
-            //really?
-            var userProtocols = _context.Users.Where(u => u.Id == userId).SelectMany(u => u.Protocols).Include(p => p.Entries).AsNoTracking();
+            var userProtocols = QueryUserProtocols();
 
             if(SearchQuery != "" && SearchQuery != StringValues.Empty) 
             {
@@ -69,9 +77,7 @@ namespace src.Controllers
                 return NotFound();
             }
 
-            var user = await _userManager.GetUserAsync(User);
-            var protocol = user.Protocols.Find(p => p.Id == id);
-
+            var protocol = await GetUserProtocolAsync(id.Value);
             if (protocol == null)
             {
                 return NotFound();
@@ -107,10 +113,8 @@ namespace src.Controllers
             //TODO: should try-catch this 
             if (ModelState.IsValid)
             {
-                var ownerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-
                 protocol.Date = DateTime.UtcNow;
-                protocol.OwnerId = ownerId;
+                protocol.UserId = _userManager.GetUserId(User);
 
                 //time in HTML form has NO timezone information!! arrives in Users Timezone,
                 //we need to save as UTC, so convert...
@@ -134,21 +138,19 @@ namespace src.Controllers
                 return NotFound();
             }
 
-            var user = await _userManager.GetUserAsync(User);
-
-            var activityProtocol = user.Protocols.Find(p => p.Id == id);
-            if (activityProtocol == null)
+            var protocol = await GetUserProtocolAsync(id.Value);
+            if (protocol == null)
             {
                 return NotFound();
             }
 
-            var auth = await _authorizationService.AuthorizeAsync(User, activityProtocol, "OneDayEditPolicy");
+            var auth = await _authorizationService.AuthorizeAsync(User, protocol, "OneDayEditPolicy");
             if(!auth.Succeeded)
             {
                 return View("EditForbidden");
             }
 
-            return View(activityProtocol);
+            return View(protocol);
         }
 
         // POST: ActivityProtocol/Edit/5
@@ -158,9 +160,7 @@ namespace src.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProtocol(int id)
         {
-            //find protocol (DB hit!!)
-            var user = await _userManager.GetUserAsync(User);
-            var protocol = user.Protocols.Find(p => p.Id == id);
+            var protocol = await GetUserProtocolAsync(id);
 
             //auth action
             var auth = await _authorizationService.AuthorizeAsync(User, protocol, "OneDayEditPolicy");
@@ -177,6 +177,7 @@ namespace src.Controllers
 
             //no need to detach anymore, because we are not tracking changes yet (?)
             //this is what ModelState.IsValid used to do for us, now we do it explicit:
+            //TODO: allowing all of Entries is probably a bad idea! Only allow Entry.Time and Entry.Description. But how?
             var updateSuccess = await TryUpdateModelAsync<ActivityProtocol>(protocol, "", 
                 p => p.JournalEntry, p => p.Entries);
 
@@ -214,8 +215,7 @@ namespace src.Controllers
                 return NotFound();
             }
 
-            var user = await _userManager.GetUserAsync(User);
-            var protocol = user.Protocols.Find(p => p.Id == id);
+            var protocol = await GetUserProtocolAsync(id.Value);
             if (protocol == null)
             {
                 return NotFound();
@@ -229,8 +229,7 @@ namespace src.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var user = await _userManager.GetUserAsync(User);
-            var protocol = user.Protocols.Find(p => p.Id == id);
+            var protocol = await GetUserProtocolAsync(id);
 
             _context.Remove(protocol);
             await _context.SaveChangesAsync();

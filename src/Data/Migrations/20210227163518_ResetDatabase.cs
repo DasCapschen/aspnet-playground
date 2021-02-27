@@ -4,24 +4,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace src.Data.Migrations
 {
-    public partial class initialIdentitySchema : Migration
+    public partial class ResetDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "ActivityProtocols",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    JournalEntry = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ActivityProtocols", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -41,6 +27,8 @@ namespace src.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
+                    Culture = table.Column<string>(type: "text", nullable: true),
+                    TimeZoneId = table.Column<string>(type: "text", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -62,24 +50,17 @@ namespace src.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProtocolEntries",
+                name: "BirdNames",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    Time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    ProtocolId = table.Column<int>(type: "integer", nullable: false)
+                    de = table.Column<string>(type: "text", nullable: true),
+                    latin = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProtocolEntries", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ProtocolEntries_ActivityProtocols_ProtocolId",
-                        column: x => x.ProtocolId,
-                        principalTable: "ActivityProtocols",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.PrimaryKey("PK_BirdNames", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -99,6 +80,27 @@ namespace src.Data.Migrations
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ActivityProtocol",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Date = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    JournalEntry = table.Column<string>(type: "text", nullable: true),
+                    UserId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActivityProtocol", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ActivityProtocol_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -188,6 +190,82 @@ namespace src.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "UserActiveBird",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    BirdId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserActiveBird", x => new { x.UserId, x.BirdId });
+                    table.ForeignKey(
+                        name: "FK_UserActiveBird_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserActiveBird_BirdNames_BirdId",
+                        column: x => x.BirdId,
+                        principalTable: "BirdNames",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserBirdStats",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    BirdId = table.Column<int>(type: "integer", nullable: false),
+                    AnswersCorrect = table.Column<int>(type: "integer", nullable: false),
+                    AnswersWrong = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserBirdStats", x => new { x.UserId, x.BirdId });
+                    table.ForeignKey(
+                        name: "FK_UserBirdStats_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserBirdStats_BirdNames_BirdId",
+                        column: x => x.BirdId,
+                        principalTable: "BirdNames",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProtocolEntry",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Description = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Time = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    ProtocolId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProtocolEntry", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProtocolEntry_ActivityProtocol_ProtocolId",
+                        column: x => x.ProtocolId,
+                        principalTable: "ActivityProtocol",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivityProtocol_UserId",
+                table: "ActivityProtocol",
+                column: "UserId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -226,9 +304,19 @@ namespace src.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProtocolEntries_ProtocolId",
-                table: "ProtocolEntries",
+                name: "IX_ProtocolEntry_ProtocolId",
+                table: "ProtocolEntry",
                 column: "ProtocolId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserActiveBird_BirdId",
+                table: "UserActiveBird",
+                column: "BirdId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserBirdStats_BirdId",
+                table: "UserBirdStats",
+                column: "BirdId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -249,16 +337,25 @@ namespace src.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "ProtocolEntries");
+                name: "ProtocolEntry");
+
+            migrationBuilder.DropTable(
+                name: "UserActiveBird");
+
+            migrationBuilder.DropTable(
+                name: "UserBirdStats");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "ActivityProtocol");
 
             migrationBuilder.DropTable(
-                name: "ActivityProtocols");
+                name: "BirdNames");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
         }
     }
 }

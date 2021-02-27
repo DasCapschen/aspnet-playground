@@ -10,8 +10,8 @@ using src.Data;
 namespace src.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210227142904_FixOwnedProtocol")]
-    partial class FixOwnedProtocol
+    [Migration("20210227163518_ResetDatabase")]
+    partial class ResetDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -176,6 +176,42 @@ namespace src.Data.Migrations
                     b.ToTable("BirdNames");
                 });
 
+            modelBuilder.Entity("src.Areas.BirdVoice.Models.UserActiveBird", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("BirdId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "BirdId");
+
+                    b.HasIndex("BirdId");
+
+                    b.ToTable("UserActiveBird");
+                });
+
+            modelBuilder.Entity("src.Areas.BirdVoice.Models.UserBirdStats", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("BirdId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AnswersCorrect")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AnswersWrong")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "BirdId");
+
+                    b.HasIndex("BirdId");
+
+                    b.ToTable("UserBirdStats");
+                });
+
             modelBuilder.Entity("src.Areas.Identity.Data.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -246,6 +282,30 @@ namespace src.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("src.Models.ActivityProtocol", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("JournalEntry")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ActivityProtocol");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -297,140 +357,88 @@ namespace src.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("src.Areas.Identity.Data.ApplicationUser", b =>
+            modelBuilder.Entity("src.Areas.BirdVoice.Models.UserActiveBird", b =>
                 {
-                    b.OwnsMany("src.Models.ActivityProtocol", "Protocols", b1 =>
+                    b.HasOne("src.Areas.BirdVoice.Models.BirdNames", "Bird")
+                        .WithMany()
+                        .HasForeignKey("BirdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("src.Areas.Identity.Data.ApplicationUser", "User")
+                        .WithMany("ActiveBirds")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bird");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("src.Areas.BirdVoice.Models.UserBirdStats", b =>
+                {
+                    b.HasOne("src.Areas.BirdVoice.Models.BirdNames", "Bird")
+                        .WithMany()
+                        .HasForeignKey("BirdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("src.Areas.Identity.Data.ApplicationUser", "User")
+                        .WithMany("BirdStats")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bird");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("src.Models.ActivityProtocol", b =>
+                {
+                    b.HasOne("src.Areas.Identity.Data.ApplicationUser", "User")
+                        .WithMany("Protocols")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsMany("src.Models.ActivityProtocol+ProtocolEntry", "Entries", b1 =>
                         {
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("integer")
                                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                            b1.Property<DateTime>("Date")
+                            b1.Property<string>("Description")
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)");
+
+                            b1.Property<int>("ProtocolId")
+                                .HasColumnType("integer");
+
+                            b1.Property<DateTime>("Time")
                                 .HasColumnType("timestamp without time zone");
-
-                            b1.Property<string>("JournalEntry")
-                                .HasColumnType("text");
-
-                            b1.Property<string>("OwnerId")
-                                .IsRequired()
-                                .HasColumnType("text");
 
                             b1.HasKey("Id");
 
-                            b1.HasIndex("OwnerId");
+                            b1.HasIndex("ProtocolId");
 
-                            b1.ToTable("ActivityProtocol");
+                            b1.ToTable("ProtocolEntry");
 
-                            b1.WithOwner("Owner")
-                                .HasForeignKey("OwnerId");
+                            b1.WithOwner("Protocol")
+                                .HasForeignKey("ProtocolId");
 
-                            b1.OwnsMany("src.Models.ActivityProtocol+ProtocolEntry", "Entries", b2 =>
-                                {
-                                    b2.Property<int>("Id")
-                                        .ValueGeneratedOnAdd()
-                                        .HasColumnType("integer")
-                                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                                    b2.Property<string>("Description")
-                                        .HasMaxLength(200)
-                                        .HasColumnType("character varying(200)");
-
-                                    b2.Property<int>("ProtocolId")
-                                        .HasColumnType("integer");
-
-                                    b2.Property<DateTime>("Time")
-                                        .HasColumnType("timestamp without time zone");
-
-                                    b2.HasKey("Id");
-
-                                    b2.HasIndex("ProtocolId");
-
-                                    b2.ToTable("ProtocolEntry");
-
-                                    b2.WithOwner("Protocol")
-                                        .HasForeignKey("ProtocolId");
-
-                                    b2.Navigation("Protocol");
-                                });
-
-                            b1.Navigation("Entries");
-
-                            b1.Navigation("Owner");
+                            b1.Navigation("Protocol");
                         });
 
-                    b.OwnsMany("src.Areas.BirdVoice.Models.UserActiveBird", "ActiveBirds", b1 =>
-                        {
-                            b1.Property<string>("UserId")
-                                .HasColumnType("text");
+                    b.Navigation("Entries");
 
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("integer")
-                                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                    b.Navigation("User");
+                });
 
-                            b1.Property<int>("BirdId")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("UserId", "Id");
-
-                            b1.HasIndex("BirdId");
-
-                            b1.ToTable("UserActiveBirds");
-
-                            b1.HasOne("src.Areas.BirdVoice.Models.BirdNames", "Bird")
-                                .WithMany()
-                                .HasForeignKey("BirdId")
-                                .OnDelete(DeleteBehavior.Cascade)
-                                .IsRequired();
-
-                            b1.WithOwner("User")
-                                .HasForeignKey("UserId");
-
-                            b1.Navigation("Bird");
-
-                            b1.Navigation("User");
-                        });
-
-                    b.OwnsMany("src.Areas.BirdVoice.Models.UserBirdStats", "BirdStats", b1 =>
-                        {
-                            b1.Property<string>("UserId")
-                                .HasColumnType("text");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("integer")
-                                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                            b1.Property<int>("AnswersCorrect")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("AnswersWrong")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("BirdId")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("UserId", "Id");
-
-                            b1.HasIndex("BirdId");
-
-                            b1.ToTable("UserBirdStats");
-
-                            b1.HasOne("src.Areas.BirdVoice.Models.BirdNames", "Bird")
-                                .WithMany()
-                                .HasForeignKey("BirdId")
-                                .OnDelete(DeleteBehavior.Cascade)
-                                .IsRequired();
-
-                            b1.WithOwner("User")
-                                .HasForeignKey("UserId");
-
-                            b1.Navigation("Bird");
-
-                            b1.Navigation("User");
-                        });
-
+            modelBuilder.Entity("src.Areas.Identity.Data.ApplicationUser", b =>
+                {
                     b.Navigation("ActiveBirds");
 
                     b.Navigation("BirdStats");

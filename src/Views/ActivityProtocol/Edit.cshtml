@@ -16,7 +16,6 @@
                 @for(int i = 0; i < Model.Entries.Count; i++) 
                 {
                     var entry = Model.Entries[i];
-                    Console.WriteLine($"Edit.html: Kind {Model.Entries[i].Time.Kind}");
                     var dict = new ViewDataDictionary(ViewData){ {"Index", i}, {"TimeValue", entry.Time}, {"DescValue", entry.Description} };
                     <partial name="_NewEntryPartial" view-data='@dict'/>
                 }

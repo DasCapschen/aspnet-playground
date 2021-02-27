@@ -33,6 +33,7 @@ namespace src
         {
             services.AddDbContext<ApplicationDbContext>(options => 
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
+                //.LogTo(msg => Console.WriteLine(msg))
                 .ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))
             );
             services.AddDatabaseDeveloperPageExceptionFilter();

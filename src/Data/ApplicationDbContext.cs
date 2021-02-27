@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using src.Areas.BirdVoice.Models;
 using src.Areas.Identity.Data;
 using src.Models;
 
@@ -15,49 +16,41 @@ namespace src.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+            
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<ApplicationUser>(user_config => {
-                //each user owns many protocols
-                user_config.OwnsMany(
-                    user => user.Protocols,
-                    protocol_config => {
-                        //protocol has owner 
-                        protocol_config.WithOwner(protocol => protocol.Owner);
-                        //protocol owns many entries
-                        protocol_config.OwnsMany(protocol => protocol.Entries).WithOwner(entry => entry.Protocol);
-                    }
-                );
-                //1 user owns many active birds (list of birds this user is actively learning)
-                user_config.OwnsMany(
-                    u => u.ActiveBirds,
-                    ab_config => {
-                        ab_config.WithOwner(ab => ab.User);
-                        ab_config.HasOne(ab => ab.Bird);
-                    }   
-                );
-                //1 user owns many bird stats (stats about birds this user learned)
-                user_config.OwnsMany(
-                    u => u.BirdStats,
-                    bs_config => {
-                        //each "bird stats" has 1 user and 1 bird
-                        bs_config.WithOwner(bs => bs.User);
-                        bs_config.HasOne(bs => bs.Bird);
-                    }
-                );
+            //okay, so, owned types are ALWAYS queried automatically...
+            //in general, owned types kind of make this stupidly complicated...
+            //so, let's revert back to HasMany :)
+
+            //using Owner is okay for Activity Protocol, because we *never* query it without its entries.
+            builder.Entity<ActivityProtocol>().OwnsMany(p => p.Entries).WithOwner(e => e.Protocol);
+
+            builder.Entity<UserActiveBird>(config => {
+                config.HasOne(ab => ab.Bird).WithMany().IsRequired();
+                config.HasKey(ab => new { ab.UserId, ab.BirdId }); 
+            });
+            builder.Entity<UserBirdStats>(config => {
+                config.HasOne(bs => bs.Bird).WithMany().IsRequired();
+                config.HasKey(bs => new { bs.UserId, bs.BirdId });
+            });
+
+            builder.Entity<ApplicationUser>(user => {
+                user.HasMany(u => u.Protocols).WithOne(p => p.User).IsRequired();
+                user.HasMany(u => u.ActiveBirds).WithOne(ab => ab.User).IsRequired();
+                user.HasMany(u => u.BirdStats).WithOne(bs => bs.User).IsRequired();
             });
         }
 
-        //"must be accessed through owning entity"
-        //public DbSet<Models.ActivityProtocol.ProtocolEntry> ProtocolEntries { get; set; }
-        //public DbSet<Models.ActivityProtocol> ActivityProtocols { get; set; }
-
         public DbSet<Areas.BirdVoice.Models.BirdNames> BirdNames { get; set; }
-        public DbSet<Areas.BirdVoice.Models.UserBirdStats> UserBirdStats { get; set; }
-        public DbSet<Areas.BirdVoice.Models.UserActiveBird> UserActiveBirds { get; set; }
+
+        //not having public accessors for these, because they should only be accessed through user!
+        //public DbSet<Areas.BirdVoice.Models.UserBirdStats> UserBirdStats { get; set; }
+        //public DbSet<Areas.BirdVoice.Models.UserActiveBird> UserActiveBirds { get; set; }
+        //public DbSet<Models.ActivityProtocol> ActivityProtocols { get; set; }
     }
 }
