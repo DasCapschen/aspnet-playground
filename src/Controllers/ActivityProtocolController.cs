@@ -43,7 +43,9 @@ namespace src.Controllers
         private IQueryable<ActivityProtocol> QueryUserProtocols()
         {
             var userId = _userManager.GetUserId(User);
-            return _context.Users.Where(u => u.Id == userId).SelectMany(u => u.Protocols).Include(p => p.Entries).AsNoTracking();
+            return _context.Users.Where(u => u.Id == userId)
+                .Include(u => u.Protocols).SelectMany(u => u.Protocols)
+                .Include(p => p.Entries).AsNoTracking();
         }
         private async Task<ActivityProtocol> GetUserProtocolAsync(int id)
         {
@@ -160,7 +162,13 @@ namespace src.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProtocol(int id)
         {
-            var protocol = await GetUserProtocolAsync(id);
+            //won't work because we get it as NoTracking()
+            //var protocol = await GetUserProtocolAsync(id);
+            var userId = _userManager.GetUserId(User);
+            var protocol = await _context.Users.Where(u => u.Id == userId)
+                .Include(u => u.Protocols).SelectMany(u => u.Protocols)
+                .Include(p => p.Entries)
+                .Where(p => p.Id == id).FirstOrDefaultAsync();
 
             //auth action
             var auth = await _authorizationService.AuthorizeAsync(User, protocol, "OneDayEditPolicy");
@@ -202,6 +210,10 @@ namespace src.Controllers
                 {
                    throw; //TODO: handle error
                 }
+            }
+            else 
+            {
+                Console.WriteLine("Nope, you cannot update this way!");
             }
 
             return RedirectToAction(nameof(Details), new { id = id });
