@@ -27,6 +27,7 @@ namespace src.Models
         public int Id { get; set; }
         
         /// on which date this protocol was created
+        //[DataType(DataType.Date)]
         public DateTime Date { get; set; }
 
         /// single journal entry for this day (unlimited length)
@@ -54,6 +55,7 @@ namespace src.Models
             public string Description { get; set; }
 
             /// when this entry was added
+            //[DataType(DataType.Time)]
             public DateTime Time { get; set; }
 
             //needed because list in protocol class!
