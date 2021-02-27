@@ -2,8 +2,8 @@
 @using src.Extensions;
 
 @{
-    CultureInfo.CurrentCulture = new CultureInfo(User.GetCulture());
-    CultureInfo.CurrentUICulture = new CultureInfo(User.GetCulture());
+    CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+    CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
     var timeZone = TimeZoneInfo.FindSystemTimeZoneById(User.GetTimeZone());
 
     int index = 0;
