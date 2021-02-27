@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.AspNetCore.Identity;
+using src.Areas.BirdVoice.Models;
 using src.Models;
 
 namespace src.Areas.Identity.Data
@@ -16,6 +17,10 @@ namespace src.Areas.Identity.Data
 
         //list of protocols this User owns
         public List<ActivityProtocol> Protocols { get; set; }
+
+        /// list of birds the user is learning right now
+        public List<UserActiveBird> ActiveBirds { get; set; }
+        public List<UserBirdStats> BirdStats { get; set; }
 
         public ApplicationUser()
             : base()

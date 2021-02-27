@@ -32,10 +32,30 @@ namespace src.Data
                         protocol_config.OwnsMany(protocol => protocol.Entries).WithOwner(entry => entry.Protocol);
                     }
                 );
+                //1 user owns many active birds (list of birds this user is actively learning)
+                user_config.OwnsMany(
+                    u => u.ActiveBirds,
+                    ab_config => {
+                        ab_config.WithOwner(ab => ab.User);
+                        ab_config.HasOne(ab => ab.Bird);
+                    }   
+                );
+                //1 user owns many bird stats (stats about birds this user learned)
+                user_config.OwnsMany(
+                    u => u.BirdStats,
+                    bs_config => {
+                        //each "bird stats" has 1 user and 1 bird
+                        bs_config.WithOwner(bs => bs.User);
+                        bs_config.HasOne(bs => bs.Bird);
+                    }
+                );
             });
         }
 
-        public DbSet<src.Models.ActivityProtocol.ProtocolEntry> ProtocolEntries { get; set; }
-        public DbSet<src.Models.ActivityProtocol> ActivityProtocols { get; set; }
+        public DbSet<Models.ActivityProtocol.ProtocolEntry> ProtocolEntries { get; set; }
+        public DbSet<Models.ActivityProtocol> ActivityProtocols { get; set; }
+        public DbSet<Areas.BirdVoice.Models.BirdNames> BirdNames { get; set; }
+        public DbSet<Areas.BirdVoice.Models.UserBirdStats> UserBirdStats { get; set; }
+        public DbSet<Areas.BirdVoice.Models.UserActiveBird> UserActiveBirds { get; set; }
     }
 }
