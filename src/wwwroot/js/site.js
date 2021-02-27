@@ -13,3 +13,41 @@ function add_new_protocol_entry() {
         }
     });
 }
+
+function move_to_active_birds() {
+    let available = document.getElementById("select-available");
+    let active = document.getElementById("select-active");
+
+    let index = available.selectedIndex;
+    let value = available.value;
+
+    if(available == null || active == null || index < 0) 
+        return;
+
+    $.ajax({
+        type: "POST",
+        url: "/BirdVoice/Home/AddActiveBird?id=" + value,
+        success: function () {
+            active.add(available.children[index]);
+        }
+    });
+}
+
+function move_to_available_birds() {
+    let available = document.getElementById("select-available");
+    let active = document.getElementById("select-active");
+
+    let index = active.selectedIndex;
+    let value = active.value;
+
+    if(available == null || active == null || index < 0) 
+        return;
+
+    $.ajax({
+        type: "POST",
+        url: "/BirdVoice/Home/RemoveActiveBird?id=" + value,
+        success: function () {
+            available.add(active.children[index]);
+        }
+    });
+}

@@ -1,9 +1,10 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace src.Areas.BirdVoice.Models
 {
-    public class BirdNames
+    public class BirdNames : IEquatable<BirdNames>
     {
         [Key]
         [Column("id")]
@@ -19,5 +20,16 @@ namespace src.Areas.BirdVoice.Models
         {
 
         }
+
+        public bool Equals(BirdNames other)
+        {
+            if (other is null)
+                return false;
+
+            return Id == other.Id;
+        }
+
+        public override bool Equals(object obj) => Equals(obj as BirdNames);
+        public override int GetHashCode() => (Id).GetHashCode();
     }
 }

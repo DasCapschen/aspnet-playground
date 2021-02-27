@@ -1,7 +1,10 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using src.Areas.BirdVoice.Models;
 using src.Areas.Identity.Data;
 using src.Data;
 
@@ -26,7 +29,78 @@ namespace src.Areas.BirdVoice.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View();
+            var userId = _userManager.GetUserId(User);
+
+            var activeBirds = _context.Users
+                .Where(u => u.Id == userId).Include(u => u.ActiveBirds)
+                .SelectMany(u => u.ActiveBirds).Select(ab => ab.Bird).OrderBy(bn => bn.German);
+
+            var availableBirds = _context.BirdNames.Except(activeBirds).OrderBy(bn => bn.German);
+
+            return View(new IndexViewModel(await availableBirds.ToListAsync(), await activeBirds.ToListAsync()));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddActiveBird(int id)
+        {
+            //get user and start tracking it
+            var user = await _userManager.GetUserAsync(User);
+            var success = await TryUpdateModelAsync<ApplicationUser>(user, "", user => user.ActiveBirds);
+            if(!success)
+                return Forbid();
+
+            //get current list of active birds from user
+            var activeBirds = await _context.Users.Where(u => u.Id == user.Id)
+                .Include(u => u.ActiveBirds).Select(u => u.ActiveBirds).FirstOrDefaultAsync();
+
+            //add the new bird to it
+            var birdToAdd = _context.BirdNames.Find(id);
+            activeBirds.Add(new UserActiveBird{
+                UserId = user.Id,
+                BirdId = id,
+            });
+
+            //update the list (this is the actual update)
+            user.ActiveBirds = activeBirds;
+
+            //write to DB
+            try {
+                await _context.SaveChangesAsync();
+            }
+            catch {
+                return Forbid();
+            }
+            return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveActiveBird(int id)
+        {
+            //get user and start tracking changes
+            var user = await _userManager.GetUserAsync(User);
+            var success = await TryUpdateModelAsync<ApplicationUser>(user, "", user => user.ActiveBirds);
+            if(!success) 
+                return Forbid();
+
+            //get current list
+            var activeBirds = await _context.Users.Where(u => u.Id == user.Id)
+                .Include(u => u.ActiveBirds).Select(u => u.ActiveBirds).FirstOrDefaultAsync();
+
+            //remove the bird
+            var birdToRemove = activeBirds.Find(p => p.BirdId == id);
+            activeBirds.Remove(birdToRemove);
+            
+            //update the list (this is the magic)
+            user.ActiveBirds = activeBirds;
+
+            //DB write
+            try {
+                await _context.SaveChangesAsync();
+            }
+            catch {
+                return Forbid();
+            }
+            return Ok();
         }
     }
 }

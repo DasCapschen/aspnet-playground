@@ -10,8 +10,6 @@ BEGIN;
 CREATE TEMPORARY TABLE temp_json (values TEXT) ON COMMIT DROP;
 \copy temp_json FROM '/project/birb.json';
 
-CREATE TABLE "BirdNames"("id" SERIAL PRIMARY KEY, "de" TEXT NOT NULL, "latin" TEXT NOT NULL);
-
 INSERT INTO "BirdNames"("de", "latin") 
 SELECT * FROM json_to_recordset((SELECT values FROM temp_json)::json) AS x("de" TEXT, "latin" TEXT);
 COMMIT;

@@ -1,3 +1,6 @@
+@using src.Areas.Identity.Data
+@model IndexViewModel
+
 <h1>Bird Voice Trainer</h1>
 <h3>Welcome back, @User.Identity.Name!</h3>
 <p>Are you ready to learn about bird songs?</p>
@@ -16,17 +19,17 @@
 <div style="display: flex; flex-direction: row; margin: 8px; width: 100%;">
     <div style="display: flex; flex-direction: column; width: 100%;">
         <label>Available Birds</label>
-        <select class="form-control" size="10"></select>
+        <select id="select-available" asp-items="@Model.AvailableBirdNames" class="form-control" size="10"></select>
     </div>
     <div style="display: flex; flex-direction: column; margin: 16px 8px 0px 8px;">
         <div style="height: 100%"></div> <!-- yes, really -->
-        <button class="btn btn-primary">&gt;&gt;</button>
+        <button class="btn btn-primary" onclick="move_to_active_birds()">&gt;&gt;</button>
         <div style="height: 100%"></div>
-        <button class="btn btn-primary">&lt;&lt;</button>
+        <button class="btn btn-primary" onclick="move_to_available_birds()">&lt;&lt;</button>
         <div style="height: 100%"></div>
     </div>
     <div style="display: flex; flex-direction: column; width: 100%;">
         <label>Active Birds</label>
-        <select class="form-control" size="10"></select>
+        <select id="select-active" asp-for="@Model.User.ActiveBirds" asp-items="@Model.ActiveBirdNames" multiple="single" class="form-control" size="10"></select>
     </div>
 </div>
