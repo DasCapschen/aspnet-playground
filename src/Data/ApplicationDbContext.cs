@@ -52,8 +52,10 @@ namespace src.Data
             });
         }
 
-        public DbSet<Models.ActivityProtocol.ProtocolEntry> ProtocolEntries { get; set; }
-        public DbSet<Models.ActivityProtocol> ActivityProtocols { get; set; }
+        //"must be accessed through owning entity"
+        //public DbSet<Models.ActivityProtocol.ProtocolEntry> ProtocolEntries { get; set; }
+        //public DbSet<Models.ActivityProtocol> ActivityProtocols { get; set; }
+
         public DbSet<Areas.BirdVoice.Models.BirdNames> BirdNames { get; set; }
         public DbSet<Areas.BirdVoice.Models.UserBirdStats> UserBirdStats { get; set; }
         public DbSet<Areas.BirdVoice.Models.UserActiveBird> UserActiveBirds { get; set; }

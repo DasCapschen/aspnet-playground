@@ -15,6 +15,7 @@ using Microsoft.Extensions.Hosting;
 using src.Policies;
 using Microsoft.AspNetCore.Authorization;
 using src.Areas.Identity.Data;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace src
 {
@@ -31,7 +32,9 @@ namespace src
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options => 
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
+                .ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))
+            );
             services.AddDatabaseDeveloperPageExceptionFilter();
 
             //use the "Identity" framework to do authentication
@@ -49,13 +52,10 @@ namespace src
             services.AddAuthorization(options => {
                 options.AddPolicy("OneDayEditPolicy", policy => 
                     policy.Requirements.Add(new OneDayEditRequirement()));
-                options.AddPolicy("UserIsOwnerPolicy", policy =>
-                    policy.Requirements.Add(new UserIsOwnerRequirement()));
             });
 
             //add the handler for that policy
             services.AddSingleton<IAuthorizationHandler, OneDayEditPolicyHandler>();
-            services.AddSingleton<IAuthorizationHandler, UserIsOwnerPolicyHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -96,9 +96,15 @@ namespace src
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapAreaControllerRoute(
+                    name: "BirdVoiceArea",
+                    areaName: "BirdVoice",
+                    pattern: "BirdVoice/{controller=Home}/{action=Index}/{id?}");
+
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+
                 endpoints.MapRazorPages();
             });
         }
