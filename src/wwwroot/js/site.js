@@ -6,6 +6,7 @@
 function add_new_protocol_entry() {
     var i = $(".ProtocolEntryForm").length;
     $.ajax({
+        type: "POST",
         url: 'AddProtocolEntry?index=' + i,
         success: function (data) {
             $('#dynEntries').append(data)

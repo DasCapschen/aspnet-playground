@@ -20,7 +20,7 @@ namespace src.Controllers
     public class ActivityProtocolController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private IAuthorizationService _authorizationService;
+        private readonly IAuthorizationService _authorizationService;
 
         public ActivityProtocolController(ApplicationDbContext context, IAuthorizationService authorizationService)
         {
@@ -88,7 +88,8 @@ namespace src.Controllers
             return View();
         }
 
-        // TODO FIXME: is accessible from URL!!!
+        // kind of fixed now, returns 405 when trying to access through URL
+        [HttpPost]
         public IActionResult AddProtocolEntry(int index)
         {
             ViewData["Index"] = index;
