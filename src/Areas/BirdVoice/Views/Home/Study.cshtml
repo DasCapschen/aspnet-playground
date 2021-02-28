@@ -1,14 +1,24 @@
+@model StudyViewModel
 @{
     ViewData["Title"] = "Study Bird Voices";
 }
 
 <h1>Study Bird Voices</h1>
 
-<p id="bird-name">You are listening to %BIRD</p>
+<p id="bird-name">You are listening to @Model.Bird.German (@Model.Bird.Latin)</p>
 
-<audio id="bird-audio" controls autoplay></audio>
+<div style="width: min-content; display: table-cell;">
+    <img style="max-height: 500px; width: auto;" src="@Model.PictureUrl"/>
+    <audio style="width: 100%;" id="bird-audio" src="@Model.AudioUrl" controls autoplay></audio>
+</div>
+
+<p>
+    Image provided through <a href="https://www.gbif.org/">GBIF</a>, license: @Model.PictureLicense
+    <br/>
+    Audio provided by <a href="https://xeno-canto.org">xeno-canto</a>, license: @Model.AudioLicense
+</p>
 
 <div>
-    <button id="btn-yes" class="btn btn-success" onclick="bird_study_yes()">I recognized this bird</button>
-    <button id="btn-no" class="btn btn-danger" onclick="bird_study_no()">This bird is new to me</button>
+    <button id="btn-yes" class="btn btn-success">I recognized this bird</button>
+    <button id="btn-no" class="btn btn-danger">This bird is new to me</button>
 </div>

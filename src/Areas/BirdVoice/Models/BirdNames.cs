@@ -10,6 +10,8 @@ namespace src.Areas.BirdVoice.Models
         [Column("id")]
         public int Id { get; set; }
 
+        public int? GbifId { get; set; } = null;
+
         [Column("de")]
         public string German { get; set; }
 

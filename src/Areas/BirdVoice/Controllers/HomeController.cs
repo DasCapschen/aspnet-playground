@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using src.Areas.BirdVoice.Models;
 using src.Areas.Identity.Data;
 using src.Data;
+using System.Text.Json;
 
 namespace src.Areas.BirdVoice.Controllers
 {
@@ -44,7 +45,28 @@ namespace src.Areas.BirdVoice.Controllers
 
         public async Task<IActionResult> Study()
         {
-            return View();
+            var bird = await GetRandomActiveBirdAsync();
+            if(!bird.GbifId.HasValue) 
+            {
+                var (gbifName, gbifId) = await GetGBIFNameAsync(bird.Latin);
+                await TryUpdateModelAsync(bird, "", b => b.GbifId, b => b.Latin);
+                bird.GbifId = gbifId;
+                bird.Latin = gbifName;
+                await _context.SaveChangesAsync();
+            }
+
+            var (audioUrl, audioLicense) = await GetXenoCantoAsync(bird.Latin);
+            var (pictureUrl, pictureLicense) = await GetGBIFPictureAsync(bird.GbifId.Value);
+
+            var model = new StudyViewModel {
+                Bird = bird,
+                AudioUrl = audioUrl,
+                AudioLicense = audioLicense,
+                PictureUrl = pictureUrl,
+                PictureLicense = pictureLicense,
+            };
+
+            return View(model);
         }
 
         public async Task<IActionResult> Quiz()
@@ -52,8 +74,7 @@ namespace src.Areas.BirdVoice.Controllers
             return View();
         }
 
-        [HttpPost]
-        public async Task<BirdNames> GetRandomActiveBird()
+        private async Task<BirdNames> GetRandomActiveBirdAsync()
         {
             var userId = _userManager.GetUserId(User);
 
@@ -65,12 +86,64 @@ namespace src.Areas.BirdVoice.Controllers
             return activeBirds[random.Next(0, activeBirds.Count)].Bird;
         }
 
-        [HttpPost]
-        public string GetXenoCanto(string latin_name)
+        private async Task<(string, string)> GetXenoCantoAsync(string latin_name)
+        {
+            var random = new Random();
+
+            using (WebClient wc = new WebClient())
+            {
+                var jsonStr = await wc.DownloadStringTaskAsync($"https://www.xeno-canto.org/api/2/recordings?query={latin_name}+q_gt:C");
+                var json = JsonDocument.Parse(jsonStr);
+                var length = json.RootElement.GetProperty("recordings").GetArrayLength();
+
+                if(length == 0) throw new Exception("Bird does not exist!");
+
+                var index = random.Next(0, length);
+                var recording = json.RootElement.GetProperty("recordings")[index];
+                var audioUrl = recording.GetProperty("file").GetString();
+                var audioLicense = recording.GetProperty("lic").GetString();
+                var audioRecorder = recording.GetProperty("rec").GetString();
+
+                return (audioUrl, $"https:{audioLicense} (recorded by {audioRecorder})");
+            }
+        }
+
+        private async Task<(string, int)> GetGBIFNameAsync(string latin_name)
         {
             using (WebClient wc = new WebClient())
             {
-                return wc.DownloadString($"https://www.xeno-canto.org/api/2/recordings?query={latin_name}+q:A");
+                var gbif = await wc.DownloadStringTaskAsync($"https://api.gbif.org/v1/species/match?name={latin_name}");
+                var json = JsonDocument.Parse(gbif);
+                var name = json.RootElement.GetProperty("species").GetString();
+                var id = json.RootElement.GetProperty("speciesKey").GetInt32();
+                return (name,id);
+            }
+        }
+
+        private async Task<(string, string)> GetGBIFPictureAsync(int id) 
+        {
+            var rand = new Random();
+
+            using (WebClient wc = new WebClient())
+            {
+                var gbif = await wc.DownloadStringTaskAsync($"https://api.gbif.org/v1/species/{id}/media");
+                var json = JsonDocument.Parse(gbif);
+                var length = json.RootElement.GetProperty("results").GetArrayLength();
+                while(true)
+                {
+                    var index = rand.Next(0,length);
+                    var img = json.RootElement.GetProperty("results")[index];
+                    var type = img.GetProperty("type").GetString();
+                    //TODO: this might be illegal, check property "license" !!!
+                    // we cannot query for free licenses :(
+                    if(type == "StillImage") 
+                    {
+                        var url = img.GetProperty("identifier").GetString();
+                        var license = img.GetProperty("license").GetString();
+                        var takenBy = img.GetProperty("rightsHolder").GetString();
+                        return (url, $"{license} (taken by {takenBy})");
+                    }
+                }
             }
         }
 
