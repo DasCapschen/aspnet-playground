@@ -54,30 +54,38 @@ function move_to_available_birds() {
 
 function bird_study_next() {
     let bird_text = document.getElementById("bird-name");
-    let bird_audio = document.getElementById("bird-audio");
 
     $.ajax({
         type: "POST",
         url: "/BirdVoice/GetRandomActiveBird",
         success: function(data){
-            bird_text.textContent = bird_text.textContent.replace("%BIRD", `${data.german} (${data.latin})`);
-            let url = get_audio_url_from_xeno_canto(data.Latin);
-            bird_audio.src = url;
+            bird_text.textContent = `You are listening to ${data.german} (${data.latin})`;
+            get_audio_from_xeno_canto(data.latin);
         }
     });
 }
 
-//AAAAANND xeno-canto doesn't return any Access-Control-Allow-Origin
-//so same-origin-policy prevents this from happening :'(
-function get_audio_url_from_xeno_canto(latin_name) {
+function get_audio_from_xeno_canto(latin_name) {
+    let bird_audio = document.getElementById("bird-audio");
+
     $.ajax({
-        type: "GET",
-        dataType: "json",
-        url: "https://www.xeno-canto.org/api/2/recordings?query=" + latin_name + "+q:A+cnt:germany",
-        success: function(data) {
-            return `https:${data.recordings[0].file}`;
+        type: "POST",
+        url: "/BirdVoice/GetXenoCanto?latin_name=" + latin_name,
+        success: function(data_str) {
+            let data = JSON.parse(data_str);
+            try {
+                let len = data.recordings.length;
+                let url = `https:${data.recordings[random_int(0,len)].file}`;
+                bird_audio.src = url;
+            } catch {
+                alert("Xeno-Canto does not have a recording of this bird :(");
+            }
         }
     });
+}
+
+function random_int(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
 }
 
 function bird_study_yes() {

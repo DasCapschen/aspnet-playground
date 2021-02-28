@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -62,6 +63,15 @@ namespace src.Areas.BirdVoice.Controllers
 
             var random = new Random();
             return activeBirds[random.Next(0, activeBirds.Count)].Bird;
+        }
+
+        [HttpPost]
+        public string GetXenoCanto(string latin_name)
+        {
+            using (WebClient wc = new WebClient())
+            {
+                return wc.DownloadString($"https://www.xeno-canto.org/api/2/recordings?query={latin_name}+q:A");
+            }
         }
 
         [HttpPost]
