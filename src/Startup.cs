@@ -100,7 +100,8 @@ namespace src
                 endpoints.MapAreaControllerRoute(
                     name: "BirdVoiceArea",
                     areaName: "BirdVoice",
-                    pattern: "BirdVoice/{controller=Home}/{action=Index}/{id?}");
+                    pattern: "BirdVoice/{action=Index}/{id?}",
+                    defaults: new { controller = "Home" });
 
                 endpoints.MapControllerRoute(
                     name: "default",

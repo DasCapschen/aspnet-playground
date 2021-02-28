@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -38,6 +39,29 @@ namespace src.Areas.BirdVoice.Controllers
             var availableBirds = _context.BirdNames.Except(activeBirds).OrderBy(bn => bn.German);
 
             return View(new IndexViewModel(await availableBirds.ToListAsync(), await activeBirds.ToListAsync()));
+        }
+
+        public async Task<IActionResult> Study()
+        {
+            return View();
+        }
+
+        public async Task<IActionResult> Quiz()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<BirdNames> GetRandomActiveBird()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var activeBirds = await _context.Users.Where(u => u.Id == userId)
+                .Include(u => u.ActiveBirds).SelectMany(u => u.ActiveBirds)
+                .Include(ab => ab.Bird).ToListAsync();
+
+            var random = new Random();
+            return activeBirds[random.Next(0, activeBirds.Count)].Bird;
         }
 
         [HttpPost]

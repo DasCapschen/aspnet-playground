@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "Study Bird Voices";
+}
+
+<h1>Study Bird Voices</h1>
+
+<p id="bird-name">You are listening to %BIRD</p>
+
+<audio id="bird-audio" controls autoplay></audio>
+
+<div>
+    <button id="btn-yes" class="btn btn-success" onclick="bird_study_yes()">I recognized this bird</button>
+    <button id="btn-no" class="btn btn-danger" onclick="bird_study_no()">This bird is new to me</button>
+</div>

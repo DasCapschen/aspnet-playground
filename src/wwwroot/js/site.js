@@ -26,7 +26,7 @@ function move_to_active_birds() {
 
     $.ajax({
         type: "POST",
-        url: "/BirdVoice/Home/AddActiveBird?id=" + value,
+        url: "/BirdVoice/AddActiveBird?id=" + value,
         success: function () {
             active.add(available.children[index]);
         }
@@ -45,9 +45,45 @@ function move_to_available_birds() {
 
     $.ajax({
         type: "POST",
-        url: "/BirdVoice/Home/RemoveActiveBird?id=" + value,
+        url: "/BirdVoice/RemoveActiveBird?id=" + value,
         success: function () {
             available.add(active.children[index]);
         }
     });
+}
+
+function bird_study_next() {
+    let bird_text = document.getElementById("bird-name");
+    let bird_audio = document.getElementById("bird-audio");
+
+    $.ajax({
+        type: "POST",
+        url: "/BirdVoice/GetRandomActiveBird",
+        success: function(data){
+            bird_text.textContent = bird_text.textContent.replace("%BIRD", `${data.german} (${data.latin})`);
+            let url = get_audio_url_from_xeno_canto(data.Latin);
+            bird_audio.src = url;
+        }
+    });
+}
+
+//AAAAANND xeno-canto doesn't return any Access-Control-Allow-Origin
+//so same-origin-policy prevents this from happening :'(
+function get_audio_url_from_xeno_canto(latin_name) {
+    $.ajax({
+        type: "GET",
+        dataType: "json",
+        url: "https://www.xeno-canto.org/api/2/recordings?query=" + latin_name + "+q:A+cnt:germany",
+        success: function(data) {
+            return `https:${data.recordings[0].file}`;
+        }
+    });
+}
+
+function bird_study_yes() {
+
+}
+
+function bird_study_now() {
+
 }

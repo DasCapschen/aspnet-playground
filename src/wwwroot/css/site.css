@@ -18,6 +18,18 @@ a {
   border-color: #1861ac;
 }
 
+.btn-success {
+  color: #fff;
+  background-color: #1d8836;
+  border-color: #156e2a;
+}
+
+.btn-danger {
+  color: #fff;
+  background-color: #c72a39;
+  border-color: #aa202d;
+}
+
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
   color: #fff;
   background-color: #1b6ec2;
