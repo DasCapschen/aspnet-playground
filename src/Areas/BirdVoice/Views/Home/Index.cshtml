@@ -37,3 +37,65 @@
         <select id="select-active" asp-for="@Model.User.ActiveBirds" asp-items="@Model.ActiveBirdNames" multiple="single" class="form-control" size="10"></select>
     </div>
 </div>
+
+@Html.AntiForgeryToken()
+
+@section scripts {
+<script type="text/javascript">
+    function move_to_active_birds() {
+        let available = document.getElementById("select-available");
+        let active = document.getElementById("select-active");
+
+        let index = available.selectedIndex;
+        let value = available.value;
+
+        if(available == null || active == null || index < 0) 
+            return;
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("AddActiveBird")',
+            data: {
+                id: value,
+                __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val()
+            },
+            success: function () {
+                active.add(available.children[index]);
+            }
+        });
+    };
+
+    function move_to_available_birds() {
+        let available = document.getElementById("select-available");
+        let active = document.getElementById("select-active");
+
+        let index = active.selectedIndex;
+        let value = active.value;
+
+        if(available == null || active == null || index < 0) 
+            return;
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("RemoveActiveBird")',
+            data: {
+                id: value,
+                __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val()
+            },
+            success: function () {
+                available.add(active.children[index]);
+            }
+        });
+    };
+
+    function validate_active_birds(action) {
+        let active = document.getElementById("select-active");
+        if (active.length == 0) {
+            alert("You must select at least 1 bird!");
+        }
+        else {
+            location.href = `/BirdVoice/${action}`;
+        }
+    };
+</script>
+}

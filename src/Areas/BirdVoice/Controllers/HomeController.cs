@@ -174,6 +174,7 @@ namespace src.Areas.BirdVoice.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddActiveBird(int id)
         {
             //get user and start tracking it
@@ -207,6 +208,7 @@ namespace src.Areas.BirdVoice.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveActiveBird(int id)
         {
             //get user and start tracking changes
