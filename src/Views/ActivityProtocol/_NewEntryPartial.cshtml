@@ -23,10 +23,10 @@
     }
 }
 
-<div class="ProtocolEntryForm">
+<div class="ProtocolEntryForm" style="margin-bottom: 8px;">
     <div class="flex-row">
         <input type="time" value="@timeValue" class="form-control" data-val="true" data-val-required="The Time field is required." id="Entries_@(index)__Time" name="Entries[@(index)].Time" value="">
-        <input type="text" value="@descValue" class="form-control" data-val="true" data-val-maxlength="The field Description must be a string or array type with a maximum length of '200'." data-val-maxlength-max="200" id="Entries_@(index)__Description" maxlength="200" name="Entries[@(index)].Description" value="">
+        <input type="text" value="@descValue" class="form-control" style="margin-left: 8px;" data-val="true" data-val-maxlength="The field Description must be a string or array type with a maximum length of '200'." data-val-maxlength-max="200" id="Entries_@(index)__Description" maxlength="200" name="Entries[@(index)].Description" value="">
     </div>
     <span class="text-danger field-validation-valid" data-valmsg-for="Entries[@(index)].Time" data-valmsg-replace="true"></span>
     <span class="text-danger field-validation-valid" data-valmsg-for="Entries[@(index)].Description" data-valmsg-replace="true"></span>
