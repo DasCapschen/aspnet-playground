@@ -219,29 +219,16 @@ namespace src.Controllers
             return RedirectToAction(nameof(Details), new { id = id });
         }
 
-        // GET: ActivityProtocol/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // POST: ActivityProtocol/Delete/5
+        [HttpPost, ActionName("Delete")]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var protocol = await GetUserProtocolAsync(id.Value);
+            var protocol = await GetUserProtocolAsync(id);
             if (protocol == null)
             {
                 return NotFound();
             }
-
-            return View(protocol);
-        }
-
-        // POST: ActivityProtocol/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var protocol = await GetUserProtocolAsync(id);
 
             _context.Remove(protocol);
             await _context.SaveChangesAsync();
