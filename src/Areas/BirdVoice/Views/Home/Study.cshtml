@@ -12,13 +12,17 @@
     <audio style="width: 100%;" id="bird-audio" src="@Model.AudioUrl" controls autoplay></audio>
 </div>
 
-<p>
-    Image provided through <a href="https://www.gbif.org/">GBIF</a>, license: @Model.PictureLicense
-    <br/>
-    Audio provided by <a href="https://xeno-canto.org">xeno-canto</a>, license: @Model.AudioLicense
-</p>
+@if(Model.PictureLicense != "") {
+    <p>Image provided through <a href="https://www.gbif.org/">GBIF</a>, license: @Model.PictureLicense</p>
+} else {
+    <p>No picture found :(</p>
+}
+@if(Model.AudioLicense != "") {
+    <p>Audio provided by <a href="https://xeno-canto.org">xeno-canto</a>, license: @Model.AudioLicense</p>
+}
 
 <div>
-    <button id="btn-yes" class="btn btn-success">I recognized this bird</button>
-    <button id="btn-no" class="btn btn-danger">This bird is new to me</button>
+    <!-- TODO: do something more here, like count stats -->
+    <a id="btn-yes" class="btn btn-success" asp-action="Study">I recognized this bird</a>
+    <a id="btn-no" class="btn btn-danger" asp-action="Study">This bird is new to me</a>
 </div>

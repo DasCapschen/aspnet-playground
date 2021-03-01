@@ -51,3 +51,13 @@ function move_to_available_birds() {
         }
     });
 }
+
+function validate_active_birds(action) {
+    let active = document.getElementById("select-active");
+    if (active.length == 0) {
+        alert("You must select at least 1 bird!");
+    }
+    else {
+        location.href = `/BirdVoice/${action}`;
+    }
+}

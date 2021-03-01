@@ -9,8 +9,8 @@
 <h4>Welcome back, @User.Identity.Name!</h4>
 <h4>Are you ready to learn about bird songs?</h4>
 <div>
-    <a class="btn btn-primary" id="study" asp-action="Study">Study Bird Voices</a>
-    <a class="btn btn-primary" id="quiz" asp-action="Quiz">Take a Quiz</a>
+    <button class="btn btn-primary" id="study" onclick='validate_active_birds("Study")'>Study Bird Voices</button>
+    <button class="btn btn-primary" id="quiz" onclick='validate_active_birds("Quiz")'>Take a Quiz</button>
 </div>
 
 <hr/>

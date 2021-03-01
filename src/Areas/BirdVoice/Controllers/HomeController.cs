@@ -45,7 +45,13 @@ namespace src.Areas.BirdVoice.Controllers
 
         public async Task<IActionResult> Study()
         {
-            var bird = await GetRandomActiveBirdAsync();
+            BirdNames bird = null;
+            try {
+                bird = await GetRandomActiveBirdAsync();
+            } catch {
+                return NotFound();
+            }
+
             if(!bird.GbifId.HasValue) 
             {
                 var (gbifName, gbifId) = await GetGBIFNameAsync(bird.Latin);
@@ -58,13 +64,16 @@ namespace src.Areas.BirdVoice.Controllers
             var (audioUrl, audioLicense) = await GetXenoCantoAsync(bird.Latin);
             var (pictureUrl, pictureLicense) = await GetGBIFPictureAsync(bird.GbifId.Value);
 
-            var model = new StudyViewModel {
+            var model = new StudyViewModel{
                 Bird = bird,
                 AudioUrl = audioUrl,
-                AudioLicense = audioLicense,
-                PictureUrl = pictureUrl,
-                PictureLicense = pictureLicense,
+                AudioLicense = audioLicense
             };
+
+            if(pictureUrl != "") {
+                model.PictureUrl = pictureUrl;
+                model.PictureLicense = pictureLicense;
+            }
 
             return View(model);
         }
@@ -82,6 +91,10 @@ namespace src.Areas.BirdVoice.Controllers
                 .Include(u => u.ActiveBirds).SelectMany(u => u.ActiveBirds)
                 .Include(ab => ab.Bird).ToListAsync();
 
+            if(activeBirds.Count == 0) {
+                throw new Exception("No Active Birds!");
+            }
+
             var random = new Random();
             return activeBirds[random.Next(0, activeBirds.Count)].Bird;
         }
@@ -96,7 +109,7 @@ namespace src.Areas.BirdVoice.Controllers
                 var json = JsonDocument.Parse(jsonStr);
                 var length = json.RootElement.GetProperty("recordings").GetArrayLength();
 
-                if(length == 0) throw new Exception("Bird does not exist!");
+                if(length == 0) throw new Exception("No recording found on Xeno-Canto!");
 
                 var index = random.Next(0, length);
                 var recording = json.RootElement.GetProperty("recordings")[index];
@@ -126,25 +139,38 @@ namespace src.Areas.BirdVoice.Controllers
 
             using (WebClient wc = new WebClient())
             {
-                var gbif = await wc.DownloadStringTaskAsync($"https://api.gbif.org/v1/species/{id}/media");
-                var json = JsonDocument.Parse(gbif);
-                var length = json.RootElement.GetProperty("results").GetArrayLength();
-                while(true)
+                var offset = 0;
+                string gbif = "";
+                while(!gbif.Contains("\"endOfRecords\":true"))
                 {
-                    var index = rand.Next(0,length);
-                    var img = json.RootElement.GetProperty("results")[index];
-                    var type = img.GetProperty("type").GetString();
-                    //TODO: this might be illegal, check property "license" !!!
-                    // we cannot query for free licenses :(
-                    if(type == "StillImage") 
+                    gbif = await wc.DownloadStringTaskAsync($"https://api.gbif.org/v1/species/{id}/media?offset={offset}");
+                    if(!gbif.Contains("\"license\":\"CC")) 
                     {
-                        var url = img.GetProperty("identifier").GetString();
+                        offset += 20;
+                        continue;
+                    }
+
+                    var json = JsonDocument.Parse(gbif);
+                    var length = json.RootElement.GetProperty("results").GetArrayLength();
+                    while(true)
+                    {
+                        var index = rand.Next(0,length);
+                        var img = json.RootElement.GetProperty("results")[index];
+                        var type = img.GetProperty("type").GetString();
                         var license = img.GetProperty("license").GetString();
-                        var takenBy = img.GetProperty("rightsHolder").GetString();
-                        return (url, $"{license} (taken by {takenBy})");
+                        //TODO: this might be illegal, check property "license" !!!
+                        // we cannot query for free licenses :(
+                        if(type == "StillImage" && license.Contains("CC")) 
+                        {
+                            var url = img.GetProperty("identifier").GetString();
+                            var takenBy = img.GetProperty("rightsHolder").GetString();
+                            return (url, $"{license} (taken by {takenBy})");
+                        }
                     }
                 }
             }
+
+            return ("", "");
         }
 
         [HttpPost]
