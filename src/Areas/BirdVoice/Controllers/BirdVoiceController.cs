@@ -15,13 +15,13 @@ namespace src.Areas.BirdVoice.Controllers
 {
     [Area("BirdVoice")]
     [Authorize]
-    public class HomeController : Controller
+    public class BirdVoiceController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IAuthorizationService _authorizationService;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public HomeController(ApplicationDbContext context, 
+        public BirdVoiceController(ApplicationDbContext context, 
             IAuthorizationService authorizationService,
             UserManager<ApplicationUser> userManager)
         {

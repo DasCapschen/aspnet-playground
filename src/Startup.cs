@@ -12,7 +12,7 @@ using src.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using src.Policies;
+using src.Areas.ActiviyProtocol.Policies;
 using Microsoft.AspNetCore.Authorization;
 using src.Areas.Identity.Data;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -101,11 +101,18 @@ namespace src
                     name: "BirdVoiceArea",
                     areaName: "BirdVoice",
                     pattern: "BirdVoice/{action=Index}/{id?}",
-                    defaults: new { controller = "Home" });
+                    defaults: new { controller = "BirdVoice" });
+
+                endpoints.MapAreaControllerRoute(
+                    name: "ActivityProtocolArea",
+                    areaName: "ActivityProtocol",
+                    pattern: "ActivityProtocol/{action=Index}/{id?}",
+                    defaults: new { controller = "ActivityProtocol" });
 
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{action=Index}/{id?}",
+                    defaults: new { controller = "Home" });
 
                 endpoints.MapRazorPages();
             });

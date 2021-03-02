@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 using src.Areas.Identity.Data;
 
-namespace src.Models
+namespace src.Areas.ActiviyProtocol.Models
 {
     /// Activity Protocol lets the user create entries about their activity
     /// at certain times throughout the day.

@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using src.Models;
+using src.Areas.ActiviyProtocol.Models;
 
-namespace src.Policies 
+namespace src.Areas.ActiviyProtocol.Policies 
 {
     public class OneDayEditRequirement : IAuthorizationRequirement { }
 

@@ -111,6 +111,11 @@ textarea {
   table-layout: fixed;
 }
 
+.clickable-row:hover {
+  background: #1b6fc241;
+  cursor: pointer;
+}
+
 .text-ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -125,3 +130,4 @@ textarea {
   display: flex;
   flex-direction: row;
 }
+

@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.AspNetCore.Identity;
-using src.Areas.BirdVoice.Models;
 using src.Models;
+using src.Areas.ActiviyProtocol.Models;
+using src.Areas.BirdVoice.Models;
 
 namespace src.Areas.Identity.Data
 {

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using src.Areas.BirdVoice.Models;
+using src.Areas.ActiviyProtocol.Models;
 using src.Areas.Identity.Data;
 using src.Models;
 

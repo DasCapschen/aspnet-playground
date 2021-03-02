@@ -1,7 +1,7 @@
 @using System.Globalization;
 @using Microsoft.Extensions.Primitives
 @using src.Extensions;
-@model IEnumerable<src.Models.ActivityProtocol>
+@model IEnumerable<src.Areas.ActiviyProtocol.Models.ActivityProtocol>
 
 @{
     ViewData["Title"] = "Activity Protocols";
@@ -44,24 +44,27 @@
             <th>
                 @Html.DisplayNameFor(model => model.JournalEntry)
             </th>
-            <th style="width: 175px;"></th>
         </tr>
     </thead>
     <tbody>
     @foreach (var item in Model) {
-        <tr>
+        <tr class="clickable-row" onclick="go_to_details(@item.Id)">
             <td>
                 @TimeZoneInfo.ConvertTimeFromUtc(item.Date, timeZone).ToString("d", CultureInfo.CurrentCulture)
             </td>
             <td class="text-ellipsis">
                 @Html.DisplayFor(modelItem => item.JournalEntry)
             </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a>
-            </td>
         </tr>
     }
     </tbody>
 </table>
 <a asp-action="Create" class="btn btn-primary margin8">Create new</a>
+
+@section scripts {
+    <script type="text/javascript">
+        function go_to_details(id) {
+            window.location = `/ActivityProtocol/Details/${id}`;
+        }
+    </script>
+}

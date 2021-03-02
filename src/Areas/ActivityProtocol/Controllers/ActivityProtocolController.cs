@@ -12,12 +12,13 @@ using Microsoft.Extensions.Primitives;
 using src.Areas.Identity.Data;
 using src.Data;
 using src.Extensions;
-using src.Models;
-using src.Policies;
+using src.Areas.ActiviyProtocol.Models;
+using src.Areas.ActiviyProtocol.Policies;
 
-namespace src.Controllers
+namespace src.Areas.ActiviyProtocol.Controllers
 {
     [Authorize]
+    [Area("ActivityProtocol")]
     public class ActivityProtocolController : Controller
     {
         private readonly ApplicationDbContext _context;
