@@ -13,15 +13,15 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
+                <label>Entries</label>
                 @for(int i = 0; i < Model.Entries.Count; i++) 
                 {
                     var entry = Model.Entries[i];
                     var dict = new ViewDataDictionary(ViewData){ {"Index", i}, {"TimeValue", entry.Time}, {"DescValue", entry.Description} };
                     <partial name="_NewEntryPartial" view-data='@dict'/>
                 }
-                @if(Model.Entries.Count > 0) {
-                    <hr/>
-                }
+                <button id="AddEntry" type="button" class="btn btn-success" onclick="add_new_protocol_entry()"><i class="fas fa-plus"></i></button>
+                <hr/>
                 <label asp-for="JournalEntry" class="control-label"></label>
                 <textarea asp-for="JournalEntry" class="form-control"></textarea>
                 <span asp-validation-for="JournalEntry" class="text-danger"></span>
