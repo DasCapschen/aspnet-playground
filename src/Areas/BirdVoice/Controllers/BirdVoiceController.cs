@@ -10,6 +10,7 @@ using src.Areas.BirdVoice.Models;
 using src.Areas.Identity.Data;
 using src.Data;
 using System.Text.Json;
+using System.Collections.Generic;
 
 namespace src.Areas.BirdVoice.Controllers
 {
@@ -80,23 +81,56 @@ namespace src.Areas.BirdVoice.Controllers
 
         public async Task<IActionResult> Quiz()
         {
-            return View();
+            var random = new Random();
+            var correctBird = random.Next(1,5); //[1,5) = [1,4]
+
+            var bird1 = await GetRandomActiveBirdAsync();
+            var bird2 = await GetRandomActiveBirdAsync(bird1);
+            var bird3 = await GetRandomActiveBirdAsync(bird1, bird2);
+            var bird4 = await GetRandomActiveBirdAsync(bird1, bird2, bird3);
+            
+            //ouch, really?
+            string url = "", license = "";
+            switch(correctBird) {
+                case 1: (url, license) = await GetXenoCantoAsync(bird1.Latin); break;
+                case 2: (url, license) = await GetXenoCantoAsync(bird2.Latin); break;
+                case 3: (url, license) = await GetXenoCantoAsync(bird3.Latin); break;
+                case 4: (url, license) = await GetXenoCantoAsync(bird4.Latin); break;
+            }
+
+            var model = new QuizViewModel {
+                Bird1 = bird1,
+                Bird2 = bird2,
+                Bird3 = bird3,
+                Bird4 = bird4,
+                CorrectBird = correctBird,
+                AudioUrl = url,
+                AudioLicense = license
+            };
+            return View(model);
         }
 
-        private async Task<BirdNames> GetRandomActiveBirdAsync()
+        private async Task<BirdNames> GetRandomActiveBirdAsync(params BirdNames[] except)
         {
             var userId = _userManager.GetUserId(User);
 
-            var activeBirds = await _context.Users.Where(u => u.Id == userId)
+            IQueryable<UserActiveBird> queryBirds = _context.Users.Where(u => u.Id == userId)
                 .Include(u => u.ActiveBirds).SelectMany(u => u.ActiveBirds)
-                .Include(ab => ab.Bird).ToListAsync();
+                .Include(ab => ab.Bird);
 
-            if(activeBirds.Count == 0) {
+            if(!(except is null)) 
+            {
+                queryBirds = queryBirds.Where(uab => !except.Contains(uab.Bird));
+            }
+
+            var activeBirds = await queryBirds.ToListAsync();
+
+            if(activeBirds.Count() == 0) {
                 throw new Exception("No Active Birds!");
             }
 
             var random = new Random();
-            return activeBirds[random.Next(0, activeBirds.Count)].Bird;
+            return activeBirds[random.Next(0, activeBirds.Count())].Bird;
         }
 
         private async Task<(string, string)> GetXenoCantoAsync(string latin_name)

@@ -1,7 +1,56 @@
+@model QuizViewModel
 @{
     ViewData["Title"] = "Bird Voice Quiz";
 }
 
 <h1>Bird Voice Quiz</h1>
+<hr/>
+<h3>Which bird are you hearing?</h3>
 
+<div style="width: min-content; display: table-cell;">
+    <img style="max-height: 300px; width: auto;" src="@Model.PictureUrl"/>
+    <audio style="width: 100%;" id="bird-audio" src="@Model.AudioUrl" controls autoplay></audio>
+</div>
+<p>Audio provided by <a href="https://xeno-canto.org">xeno-canto</a>, license: @Model.AudioLicense</p>
 
+<hr/>
+
+<h4>Answer:</h4>
+<p>This bird is...</p>
+<div class="flex-row" style="margin: -8px;">
+    <button type="button" class="btn btn-primary margin8 btn-answer" onclick="check_bird(1)">@Model.Bird1.German (@Model.Bird1.Latin)</button>
+    <button type="button" class="btn btn-primary margin8 btn-answer" onclick="check_bird(2)">@Model.Bird2.German (@Model.Bird2.Latin)</button>
+    <button type="button" class="btn btn-primary margin8 btn-answer" onclick="check_bird(3)">@Model.Bird3.German (@Model.Bird3.Latin)</button>
+    <button type="button" class="btn btn-primary margin8 btn-answer" onclick="check_bird(4)">@Model.Bird4.German (@Model.Bird4.Latin)</button>
+</div>
+
+<br/>
+
+<h4 id="text-correct" hidden style="color: green;"><i class="fas fa-check"></i> That is correct!</h4>
+<h4 id="text-wrong" hidden style="color: red;"><i class="fas fa-times"></i> Sorry, that's not correct.</h4>
+<p id="text-answer" hidden> You were listening to: 
+@switch(Model.CorrectBird) {
+    case 1: <i>@Model.Bird1.German (@Model.Bird1.Latin)</i>; break;
+    case 2: <i>@Model.Bird2.German (@Model.Bird2.Latin)</i>; break;
+    case 3: <i>@Model.Bird3.German (@Model.Bird3.Latin)</i>; break;
+    case 4: <i>@Model.Bird4.German (@Model.Bird4.Latin)</i>; break;
+}
+</p>
+<a id="btn-next" class="btn btn-primary margin8" hidden asp-action="Quiz">Continue</a>
+
+@section scripts {
+    <script type="text/javascript">
+        //TODO: user could cheat, should check on server :^)
+        //TODO: need to save user stats on server too!
+        function check_bird(index) {
+            $(".btn-answer").prop("disabled", true);
+            $("#btn-next").prop("hidden", false);
+            $("#text-answer").prop("hidden", false);
+            if(index == @Model.CorrectBird) {
+                $("#text-correct").prop("hidden", false);
+            } else {
+                $("#text-wrong").prop("hidden", false);
+            }
+        }
+    </script>
+}
