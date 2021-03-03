@@ -6,9 +6,14 @@ function add_new_protocol_entry() {
     var i = $(".ProtocolEntryForm").length;
     $.ajax({
         type: "POST",
-        url: 'AddProtocolEntry?index=' + i,
+        url: '/ActivityProtocol/AddProtocolEntry?index=' + i,
         success: function (data) {
-            $('#dynEntries').append(data)
+            $('#dynEntries').append(data);
+
+            //remove validator from the form
+            $("form").removeData("validator").removeData("unobtrusiveValidation");
+            //add validator again (parses the new html we just added)
+            $.validator.unobtrusive.parse("form");
         }
     });
 }
