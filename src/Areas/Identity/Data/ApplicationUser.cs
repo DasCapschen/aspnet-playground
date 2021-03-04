@@ -22,6 +22,7 @@ namespace src.Areas.Identity.Data
         /// list of birds the user is learning right now
         public List<UserActiveBird> ActiveBirds { get; set; }
         public List<UserBirdStats> BirdStats { get; set; }
+        public List<UserBirdPriority> BirdPriorities { get; set; }
 
         public ApplicationUser()
             : base()

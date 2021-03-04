@@ -1,8 +1,12 @@
+@using System.Globalization
 @using src.Areas.Identity.Data
+@using src.Extensions;
 @model IndexViewModel
 
 @{
     ViewData["Title"] = "Bird Voice";
+    CultureInfo.CurrentCulture = new CultureInfo(User.GetCulture());
+    CultureInfo.CurrentUICulture = new CultureInfo(User.GetCulture());
 }
 
 <h1>Bird Voice Trainer</h1>
@@ -16,7 +20,16 @@
 <hr/>
 
 <h3>Here are your stats:</h3>
-<p>WIP</p>
+<div style="flex-row">
+    @if(Model.TotalAnswers > 0) {
+        <p>Of the @Model.TotalAnswers Quizes you took, you answered @Model.TotalCorrect correctly.</p>
+        <p>On average you answer @Model.TotalCorrectPercent.ToString("P1") of questions correctly.</p>
+        <p>Your best bird is @Model.BestBird.Bird.FullName with @Model.BestBird.AnswersCorrect (@Model.BestBird.AnswersCorrectPercent.ToString("P1")) correct answers</p>
+        <p>Your weakest bird is @Model.WorstBird.Bird.FullName with @Model.WorstBird.AnswersCorrect (@Model.WorstBird.AnswersCorrectPercent.ToString("P1")) correct answers</p>
+    } else {
+        <p>You have not taken any quizzes yet!</p>
+    }
+</div>
 
 <hr />
 <h3>Select Birds you want to study: </h3>

@@ -5,7 +5,7 @@
 
 <h1>Study Bird Voices</h1>
 <hr/>
-<p id="bird-name">You are listening to @Model.Bird.German (@Model.Bird.Latin)</p>
+<p id="bird-name">You are listening to @Model.Bird.FullName</p>
 
 <div style="width: min-content; display: table-cell;">
     <img style="max-height: 500px; width: auto;" src="@Model.PictureUrl"/>
@@ -22,7 +22,27 @@
 }
 
 <div>
-    <!-- TODO: do something more here, like count stats -->
-    <a id="btn-yes" class="btn btn-success" asp-action="Study">I recognized this bird</a>
-    <a id="btn-no" class="btn btn-danger" asp-action="Study">This bird is new to me</a>
+    <button id="btn-yes" class="btn btn-success" onclick="answer(true)">I recognized this bird</button>
+    <button id="btn-no" class="btn btn-danger" onclick="answer(false)">This bird is new to me</button>
 </div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script type="text/javascript">
+    function answer(known) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("StudyAnswer")',
+            data: {
+                birdId: "@Model.Bird.Id",
+                known: known,
+                __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val()
+            },
+            success: function () {
+                window.location = '@Url.Action("Study")'
+            }
+        });
+    }
+    </script>
+}

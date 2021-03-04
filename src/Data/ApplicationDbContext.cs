@@ -39,11 +39,16 @@ namespace src.Data
                 config.HasOne(bs => bs.Bird).WithMany().IsRequired();
                 config.HasKey(bs => new { bs.UserId, bs.BirdId });
             });
+            builder.Entity<UserBirdPriority>(config => {
+                config.HasOne(bp => bp.Bird).WithMany().IsRequired();
+                config.HasKey(bp => new { bp.UserId, bp.BirdId });
+            });
 
             builder.Entity<ApplicationUser>(user => {
                 user.HasMany(u => u.Protocols).WithOne(p => p.User).IsRequired();
                 user.HasMany(u => u.ActiveBirds).WithOne(ab => ab.User).IsRequired();
                 user.HasMany(u => u.BirdStats).WithOne(bs => bs.User).IsRequired();
+                user.HasMany(u => u.BirdPriorities).WithOne(bp => bp.User).IsRequired();
             });
         }
 

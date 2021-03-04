@@ -18,6 +18,8 @@ namespace src.Areas.BirdVoice.Models
         [Column("latin")]
         public string Latin { get; set; }
 
+        public string FullName => $"{German} ({Latin})";
+
         public BirdNames()
         {
 

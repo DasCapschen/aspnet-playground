@@ -10,8 +10,8 @@ using src.Data;
 namespace src.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210228151252_BirdNamesUpdate")]
-    partial class BirdNamesUpdate
+    [Migration("20210304125321_ResetDatabase")]
+    partial class ResetDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -155,6 +155,30 @@ namespace src.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("src.Areas.ActiviyProtocol.Models.ActivityProtocol", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("JournalEntry")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ActivityProtocol");
+                });
+
             modelBuilder.Entity("src.Areas.BirdVoice.Models.BirdNames", b =>
                 {
                     b.Property<int>("Id")
@@ -192,6 +216,24 @@ namespace src.Data.Migrations
                     b.HasIndex("BirdId");
 
                     b.ToTable("UserActiveBird");
+                });
+
+            modelBuilder.Entity("src.Areas.BirdVoice.Models.UserBirdPriority", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("BirdId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "BirdId");
+
+                    b.HasIndex("BirdId");
+
+                    b.ToTable("UserBirdPriority");
                 });
 
             modelBuilder.Entity("src.Areas.BirdVoice.Models.UserBirdStats", b =>
@@ -285,30 +327,6 @@ namespace src.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("src.Models.ActivityProtocol", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("JournalEntry")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ActivityProtocol");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -360,45 +378,7 @@ namespace src.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("src.Areas.BirdVoice.Models.UserActiveBird", b =>
-                {
-                    b.HasOne("src.Areas.BirdVoice.Models.BirdNames", "Bird")
-                        .WithMany()
-                        .HasForeignKey("BirdId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("src.Areas.Identity.Data.ApplicationUser", "User")
-                        .WithMany("ActiveBirds")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Bird");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("src.Areas.BirdVoice.Models.UserBirdStats", b =>
-                {
-                    b.HasOne("src.Areas.BirdVoice.Models.BirdNames", "Bird")
-                        .WithMany()
-                        .HasForeignKey("BirdId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("src.Areas.Identity.Data.ApplicationUser", "User")
-                        .WithMany("BirdStats")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Bird");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("src.Models.ActivityProtocol", b =>
+            modelBuilder.Entity("src.Areas.ActiviyProtocol.Models.ActivityProtocol", b =>
                 {
                     b.HasOne("src.Areas.Identity.Data.ApplicationUser", "User")
                         .WithMany("Protocols")
@@ -406,7 +386,7 @@ namespace src.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("src.Models.ActivityProtocol+ProtocolEntry", "Entries", b1 =>
+                    b.OwnsMany("src.Areas.ActiviyProtocol.Models.ActivityProtocol+ProtocolEntry", "Entries", b1 =>
                         {
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
@@ -440,9 +420,68 @@ namespace src.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("src.Areas.BirdVoice.Models.UserActiveBird", b =>
+                {
+                    b.HasOne("src.Areas.BirdVoice.Models.BirdNames", "Bird")
+                        .WithMany()
+                        .HasForeignKey("BirdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("src.Areas.Identity.Data.ApplicationUser", "User")
+                        .WithMany("ActiveBirds")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bird");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("src.Areas.BirdVoice.Models.UserBirdPriority", b =>
+                {
+                    b.HasOne("src.Areas.BirdVoice.Models.BirdNames", "Bird")
+                        .WithMany()
+                        .HasForeignKey("BirdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("src.Areas.Identity.Data.ApplicationUser", "User")
+                        .WithMany("BirdPriorities")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bird");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("src.Areas.BirdVoice.Models.UserBirdStats", b =>
+                {
+                    b.HasOne("src.Areas.BirdVoice.Models.BirdNames", "Bird")
+                        .WithMany()
+                        .HasForeignKey("BirdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("src.Areas.Identity.Data.ApplicationUser", "User")
+                        .WithMany("BirdStats")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bird");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("src.Areas.Identity.Data.ApplicationUser", b =>
                 {
                     b.Navigation("ActiveBirds");
+
+                    b.Navigation("BirdPriorities");
 
                     b.Navigation("BirdStats");
 

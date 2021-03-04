@@ -55,6 +55,7 @@ namespace src.Data.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    GbifId = table.Column<int>(type: "integer", nullable: true),
                     de = table.Column<string>(type: "text", nullable: true),
                     latin = table.Column<string>(type: "text", nullable: true)
                 },
@@ -215,6 +216,31 @@ namespace src.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserBirdPriority",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    BirdId = table.Column<int>(type: "integer", nullable: false),
+                    Priority = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserBirdPriority", x => new { x.UserId, x.BirdId });
+                    table.ForeignKey(
+                        name: "FK_UserBirdPriority_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserBirdPriority_BirdNames_BirdId",
+                        column: x => x.BirdId,
+                        principalTable: "BirdNames",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserBirdStats",
                 columns: table => new
                 {
@@ -314,6 +340,11 @@ namespace src.Data.Migrations
                 column: "BirdId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserBirdPriority_BirdId",
+                table: "UserBirdPriority",
+                column: "BirdId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserBirdStats_BirdId",
                 table: "UserBirdStats",
                 column: "BirdId");
@@ -341,6 +372,9 @@ namespace src.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserActiveBird");
+
+            migrationBuilder.DropTable(
+                name: "UserBirdPriority");
 
             migrationBuilder.DropTable(
                 name: "UserBirdStats");

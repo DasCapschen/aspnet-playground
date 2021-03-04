@@ -10,6 +10,15 @@ namespace src.Areas.BirdVoice.Models
         public List<SelectListItem> AvailableBirdNames { get; set; }
         public List<SelectListItem> ActiveBirdNames { get; set; }
 
+        public UserBirdStats BestBird { get; set; }
+        public UserBirdStats WorstBird { get; set; }
+
+        public int TotalAnswers { get; set; }
+        public int TotalCorrect { get; set; }
+        public int TotalWrong { get; set; }
+
+        public double TotalCorrectPercent => TotalAnswers > 0 ? (double)TotalCorrect / (double)TotalAnswers : 0;
+
         public IndexViewModel(List<BirdNames> available, List<BirdNames> active)
         {
             AvailableBirdNames = new List<SelectListItem>();
@@ -17,7 +26,7 @@ namespace src.Areas.BirdVoice.Models
             {
                 AvailableBirdNames.Add(new SelectListItem{
                     Value = $"{bird.Id}",
-                    Text = $"{bird.German} ({bird.Latin})"
+                    Text = bird.FullName
                 });
             }
 
@@ -26,7 +35,7 @@ namespace src.Areas.BirdVoice.Models
             {
                 ActiveBirdNames.Add(new SelectListItem{
                     Value = $"{bird.Id}",
-                    Text = $"{bird.German} ({bird.Latin})"
+                    Text = bird.FullName
                 });
             }
         }

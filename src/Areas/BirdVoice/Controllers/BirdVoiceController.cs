@@ -41,28 +41,34 @@ namespace src.Areas.BirdVoice.Controllers
 
             var availableBirds = _context.BirdNames.Except(activeBirds).OrderBy(bn => bn.German);
 
-            return View(new IndexViewModel(await availableBirds.ToListAsync(), await activeBirds.ToListAsync()));
+            var model = new IndexViewModel(await availableBirds.ToListAsync(), await activeBirds.ToListAsync());
+
+            var statsQuery = _context.Users.Where(u => u.Id == userId)
+                .Include(u => u.BirdStats).SelectMany(u => u.BirdStats);
+
+            model.TotalAnswers = await statsQuery.SumAsync(bs => bs.AnswersCorrect + bs.AnswersWrong);
+            model.TotalCorrect = await statsQuery.SumAsync(bs => bs.AnswersCorrect);
+            model.TotalWrong = await statsQuery.SumAsync(bs => bs.AnswersWrong);
+
+            model.BestBird = await statsQuery.Where(bs => (bs.AnswersCorrect + bs.AnswersWrong) > 0)
+                .OrderByDescending(bs => bs.AnswersCorrect / (bs.AnswersCorrect + bs.AnswersWrong)).FirstOrDefaultAsync();
+
+            model.WorstBird = await statsQuery.Where(bs => (bs.AnswersCorrect + bs.AnswersWrong) > 0)
+                .OrderByDescending(bs => bs.AnswersWrong / (bs.AnswersCorrect + bs.AnswersWrong)).FirstOrDefaultAsync();
+
+            return View(model);
         }
 
         public async Task<IActionResult> Study()
         {
             BirdNames bird = null;
             try {
-                bird = await GetRandomActiveBirdAsync();
+                bird = await GetRandomBirdWithPriorityAsync();
             } catch {
                 return NotFound();
             }
 
-            if(!bird.GbifId.HasValue) 
-            {
-                var (gbifName, gbifId) = await GetGBIFNameAsync(bird.Latin);
-                await TryUpdateModelAsync(bird, "", b => b.GbifId, b => b.Latin);
-                bird.GbifId = gbifId;
-                bird.Latin = gbifName;
-                await _context.SaveChangesAsync();
-            }
-
-            var (audioUrl, audioLicense) = await GetXenoCantoAsync(bird.Latin);
+            var (audioUrl, audioLicense) = await GetXenoCantoAsync(bird);
             var (pictureUrl, pictureLicense) = await GetGBIFPictureAsync(bird.GbifId.Value);
 
             var model = new StudyViewModel{
@@ -79,6 +85,28 @@ namespace src.Areas.BirdVoice.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task StudyAnswer(int birdId, bool known)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var birdPriority = await _context.Users.Where(u => u.Id == userId)
+                .Include(u => u.BirdPriorities).SelectMany(u => u.BirdPriorities)
+                .Where(bp => bp.BirdId == birdId).FirstOrDefaultAsync();
+            
+            var success = await TryUpdateModelAsync(birdPriority, "", bp => bp.Priority);
+            if(success)
+            {
+                if(known) birdPriority.Priority--;
+                else birdPriority.Priority++;
+                
+                await _context.SaveChangesAsync();
+                return;
+            }
+            throw new Exception("Cannot update bird Priority!");
+        }
+
         public async Task<IActionResult> Quiz()
         {
             var random = new Random();
@@ -92,10 +120,10 @@ namespace src.Areas.BirdVoice.Controllers
             //ouch, really?
             string url = "", license = "";
             switch(correctBird) {
-                case 1: (url, license) = await GetXenoCantoAsync(bird1.Latin); break;
-                case 2: (url, license) = await GetXenoCantoAsync(bird2.Latin); break;
-                case 3: (url, license) = await GetXenoCantoAsync(bird3.Latin); break;
-                case 4: (url, license) = await GetXenoCantoAsync(bird4.Latin); break;
+                case 1: (url, license) = await GetXenoCantoAsync(bird1); break;
+                case 2: (url, license) = await GetXenoCantoAsync(bird2); break;
+                case 3: (url, license) = await GetXenoCantoAsync(bird3); break;
+                case 4: (url, license) = await GetXenoCantoAsync(bird4); break;
             }
 
             var model = new QuizViewModel {
@@ -108,6 +136,27 @@ namespace src.Areas.BirdVoice.Controllers
                 AudioLicense = license
             };
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task QuizAnswer(int birdId, bool correct)
+        {
+            var userId = _userManager.GetUserId(User);
+            var birdStats = _context.Users.Where(u => u.Id == userId)
+                .Include(u => u.BirdStats).SelectMany(u => u.BirdStats)
+                .Where(bs => bs.BirdId == birdId).FirstOrDefault();
+
+            var success = await TryUpdateModelAsync(birdStats, "", bs => bs.AnswersCorrect, bs => bs.AnswersWrong);
+            if(success)
+            {
+                if(correct) birdStats.AnswersCorrect += 1;
+                else birdStats.AnswersWrong += 1;
+
+                await _context.SaveChangesAsync();
+                return;
+            }
+            throw new Exception("Cannot update bird stats!");
         }
 
         private async Task<BirdNames> GetRandomActiveBirdAsync(params BirdNames[] except)
@@ -133,13 +182,46 @@ namespace src.Areas.BirdVoice.Controllers
             return activeBirds[random.Next(0, activeBirds.Count())].Bird;
         }
 
-        private async Task<(string, string)> GetXenoCantoAsync(string latin_name)
+        private async Task<BirdNames> GetRandomBirdWithPriorityAsync()
         {
-            var random = new Random();
+            var userId = _userManager.GetUserId(User);
 
+            var activeCount = await _context.Users.Where(u => u.Id == userId)
+                .Include(u => u.ActiveBirds).SelectMany(u => u.ActiveBirds).CountAsync();
+            var priorities = await _context.Users.Where(u => u.Id == userId)
+                .Include(u => u.BirdPriorities).SelectMany(u => u.BirdPriorities)
+                .Include(bp => bp.Bird).OrderBy(bp => bp.Priority).ToListAsync();
+
+            var random = new Random();
+            double x = random.NextDouble();
+            double s = 0.0;
+            for(int i = 0; i < priorities.Count; i++)
+            {
+                s += (priorities[i].Priority/100.0) / activeCount;
+                if(x <= s)
+                {
+                    return priorities[i].Bird;
+                }
+            }
+            //should not happen EVER
+            throw new Exception("Failed to generate random bird with priority");
+        }
+
+        private async Task<(string, string)> GetXenoCantoAsync(BirdNames bird)
+        {
+            if(!bird.GbifId.HasValue) 
+            {
+                var (gbifName, gbifId) = await GetGBIFNameAsync(bird.Latin);
+                await TryUpdateModelAsync(bird, "", b => b.GbifId, b => b.Latin);
+                bird.GbifId = gbifId;
+                bird.Latin = gbifName;
+                await _context.SaveChangesAsync();
+            }
+
+            var random = new Random();
             using (WebClient wc = new WebClient())
             {
-                var jsonStr = await wc.DownloadStringTaskAsync($"https://www.xeno-canto.org/api/2/recordings?query={latin_name}+q_gt:C");
+                var jsonStr = await wc.DownloadStringTaskAsync($"https://www.xeno-canto.org/api/2/recordings?query={bird.Latin}+q_gt:C");
                 var json = JsonDocument.Parse(jsonStr);
                 var length = json.RootElement.GetProperty("recordings").GetArrayLength();
 
@@ -166,7 +248,6 @@ namespace src.Areas.BirdVoice.Controllers
                 return (name,id);
             }
         }
-
         private async Task<(string, string)> GetGBIFPictureAsync(int id) 
         {
             var rand = new Random();
@@ -212,24 +293,43 @@ namespace src.Areas.BirdVoice.Controllers
         public async Task<IActionResult> AddActiveBird(int id)
         {
             //get user and start tracking it
-            var user = await _userManager.GetUserAsync(User);
-            var success = await TryUpdateModelAsync<ApplicationUser>(user, "", user => user.ActiveBirds);
-            if(!success)
-                return Forbid();
+            var userId = _userManager.GetUserId(User);
 
-            //get current list of active birds from user
-            var activeBirds = await _context.Users.Where(u => u.Id == user.Id)
-                .Include(u => u.ActiveBirds).Select(u => u.ActiveBirds).FirstOrDefaultAsync();
+            var user = await _context.Users.Where(u => u.Id == userId)
+                .Include(u => u.ActiveBirds)
+                .Include(u => u.BirdStats)
+                .Include(u => u.BirdPriorities)
+                .FirstOrDefaultAsync();
+
+            var success = await TryUpdateModelAsync<ApplicationUser>(user, "", 
+                user => user.ActiveBirds, user => user.BirdStats, user => user.BirdPriorities);
+            if(!success) {
+                return Forbid();
+            }
 
             //add the new bird to it
-            var birdToAdd = _context.BirdNames.Find(id);
-            activeBirds.Add(new UserActiveBird{
-                UserId = user.Id,
-                BirdId = id,
-            });
+            if(!user.ActiveBirds.Exists(ab => ab.BirdId == id)) {
+                user.ActiveBirds.Add(new UserActiveBird {
+                    UserId = user.Id,
+                    BirdId = id
+                });
+            }
 
-            //update the list (this is the actual update)
-            user.ActiveBirds = activeBirds;
+            //add bird priority entry for active bird
+            if(!user.BirdPriorities.Exists(bp => bp.BirdId == id)) {
+                user.BirdPriorities.Add(new UserBirdPriority {
+                    UserId = user.Id,
+                    BirdId = id
+                });
+            }
+
+            //add user bird stats
+            if(!user.BirdStats.Exists(bp => bp.BirdId == id)) {
+                user.BirdStats.Add(new UserBirdStats {
+                    UserId = user.Id,
+                    BirdId = id
+                });
+            }
 
             //write to DB
             try {
@@ -245,22 +345,20 @@ namespace src.Areas.BirdVoice.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveActiveBird(int id)
         {
-            //get user and start tracking changes
-            var user = await _userManager.GetUserAsync(User);
-            var success = await TryUpdateModelAsync<ApplicationUser>(user, "", user => user.ActiveBirds);
-            if(!success) 
-                return Forbid();
+            //get user and start tracking it
+            var userId = _userManager.GetUserId(User);
+            var user = await _context.Users.Where(u => u.Id == userId)
+                .Include(u => u.ActiveBirds)
+                .FirstOrDefaultAsync();
 
-            //get current list
-            var activeBirds = await _context.Users.Where(u => u.Id == user.Id)
-                .Include(u => u.ActiveBirds).Select(u => u.ActiveBirds).FirstOrDefaultAsync();
+            var success = await TryUpdateModelAsync<ApplicationUser>(user, "", user => user.ActiveBirds);
+            if(!success) {
+                return Forbid();
+            }
 
             //remove the bird
-            var birdToRemove = activeBirds.Find(p => p.BirdId == id);
-            activeBirds.Remove(birdToRemove);
-            
-            //update the list (this is the magic)
-            user.ActiveBirds = activeBirds;
+            var birdToRemove = user.ActiveBirds.Find(p => p.BirdId == id);
+            user.ActiveBirds.Remove(birdToRemove);
 
             //DB write
             try {

@@ -18,10 +18,10 @@
 <h4>Answer:</h4>
 <p>This bird is...</p>
 <div class="flex-row" style="margin: -8px;">
-    <button type="button" class="btn btn-primary margin8 btn-answer" onclick="check_bird(1)">@Model.Bird1.German (@Model.Bird1.Latin)</button>
-    <button type="button" class="btn btn-primary margin8 btn-answer" onclick="check_bird(2)">@Model.Bird2.German (@Model.Bird2.Latin)</button>
-    <button type="button" class="btn btn-primary margin8 btn-answer" onclick="check_bird(3)">@Model.Bird3.German (@Model.Bird3.Latin)</button>
-    <button type="button" class="btn btn-primary margin8 btn-answer" onclick="check_bird(4)">@Model.Bird4.German (@Model.Bird4.Latin)</button>
+    <button type="button" class="btn btn-primary margin8 btn-answer" onclick="check_bird(1)">@Model.Bird1.FullName</button>
+    <button type="button" class="btn btn-primary margin8 btn-answer" onclick="check_bird(2)">@Model.Bird2.FullName</button>
+    <button type="button" class="btn btn-primary margin8 btn-answer" onclick="check_bird(3)">@Model.Bird3.FullName</button>
+    <button type="button" class="btn btn-primary margin8 btn-answer" onclick="check_bird(4)">@Model.Bird4.FullName</button>
 </div>
 
 <br/>
@@ -30,10 +30,10 @@
 <h4 id="text-wrong" hidden style="color: red;"><i class="fas fa-times"></i> Sorry, that's not correct.</h4>
 <p id="text-answer" hidden> You were listening to: 
 @switch(Model.CorrectBird) {
-    case 1: <i>@Model.Bird1.German (@Model.Bird1.Latin)</i>; break;
-    case 2: <i>@Model.Bird2.German (@Model.Bird2.Latin)</i>; break;
-    case 3: <i>@Model.Bird3.German (@Model.Bird3.Latin)</i>; break;
-    case 4: <i>@Model.Bird4.German (@Model.Bird4.Latin)</i>; break;
+    case 1: <i>@Model.Bird1.FullName</i>; break;
+    case 2: <i>@Model.Bird2.FullName</i>; break;
+    case 3: <i>@Model.Bird3.FullName</i>; break;
+    case 4: <i>@Model.Bird4.FullName</i>; break;
 }
 </p>
 <a id="btn-next" class="btn btn-primary margin8" hidden asp-action="Quiz">Continue</a>
@@ -46,11 +46,32 @@
             $(".btn-answer").prop("disabled", true);
             $("#btn-next").prop("hidden", false);
             $("#text-answer").prop("hidden", false);
+
+            let correct = false;
             if(index == @Model.CorrectBird) {
                 $("#text-correct").prop("hidden", false);
+                correct = true;
             } else {
                 $("#text-wrong").prop("hidden", false);
             }
+
+            let id = -1;
+            switch(@Model.CorrectBird) {
+                case 1: id = @Model.Bird1.Id;
+                case 2: id = @Model.Bird2.Id;
+                case 3: id = @Model.Bird3.Id;
+                case 4: id = @Model.Bird4.Id;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("QuizAnswer")',
+                data: {
+                    birdId: id,
+                    correct: correct,
+                    __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val()
+                }
+            });
         }
     </script>
 }
